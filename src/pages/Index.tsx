@@ -12,10 +12,17 @@ import { Step8ArticleOutline } from "@/components/article-steps/Step8ArticleOutl
 import { Step9ArticleEnhancements } from "@/components/article-steps/Step9ArticleEnhancements";
 import { Step10ArticleGeneration } from "@/components/article-steps/Step10ArticleGeneration";
 import { useArticle } from "@/context/ArticleContext";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 // This component will render the appropriate step based on the current state
 const StepContent = () => {
   const { state } = useArticle();
+  
+  // Log the current step to help with debugging
+  useEffect(() => {
+    console.log('Current step:', state.step);
+  }, [state.step]);
   
   switch (state.step) {
     case 1:
@@ -44,6 +51,17 @@ const StepContent = () => {
 };
 
 const Index = () => {
+  const navigate = useNavigate();
+  
+  // Redirect user from /articles route to main page
+  useEffect(() => {
+    const currentPath = window.location.pathname;
+    if (currentPath === '/articles') {
+      console.log('Redirecting from /articles to home page');
+      navigate('/');
+    }
+  }, [navigate]);
+
   return (
     <ArticleProvider>
       <ArticleLayout>

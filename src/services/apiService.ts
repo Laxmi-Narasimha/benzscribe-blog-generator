@@ -2,7 +2,7 @@
 import axios from 'axios';
 import { Reference, Keyword, ArticleTitle, OutlineHeading } from '@/lib/types';
 
-// API keys
+// API keys - using the ones provided
 const OPENAI_API_KEY = "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";
 const SERP_API_KEY = "ab325143079f0c503ec178b08970495d178f2cb7c556dd7b014f459c5b2bad8f";
 
@@ -11,6 +11,7 @@ export const apiService = {
   // Fetch references based on topic
   fetchReferences: async (topic: string): Promise<Reference[]> => {
     try {
+      console.log('Fetching references for topic:', topic);
       const response = await axios.get('https://serpapi.com/search', {
         params: {
           q: topic,
@@ -20,6 +21,7 @@ export const apiService = {
         }
       });
       
+      console.log('References API response:', response.data);
       const organicResults = response.data.organic_results || [];
       
       return organicResults.map((result: any, index: number) => ({
@@ -38,6 +40,7 @@ export const apiService = {
   // Fetch primary keywords based on topic
   fetchPrimaryKeywords: async (topic: string): Promise<Keyword[]> => {
     try {
+      console.log('Fetching primary keywords for topic:', topic);
       // Using SerpAPI for keywords
       const response = await axios.get('https://serpapi.com/search', {
         params: {
@@ -47,6 +50,7 @@ export const apiService = {
         }
       });
       
+      console.log('Primary keywords API response received');
       // Extract related searches and keywords from the response
       const relatedSearches = response.data.related_searches || [];
       const relatedQuestions = response.data.related_questions || [];
@@ -82,6 +86,7 @@ export const apiService = {
         difficulty: Math.floor(Math.random() * 50) + 40,
       });
       
+      console.log('Primary keywords processed:', primaryKeywords.length);
       return primaryKeywords;
     } catch (error) {
       console.error('Error fetching primary keywords:', error);
@@ -98,6 +103,7 @@ export const apiService = {
   // Generate titles based on topic and primary keyword
   generateTitles: async (topic: string, primaryKeyword: string): Promise<ArticleTitle[]> => {
     try {
+      console.log('Generating titles for topic:', topic, 'with keyword:', primaryKeyword);
       const response = await axios.post(
         'https://api.openai.com/v1/chat/completions',
         {
@@ -121,6 +127,7 @@ export const apiService = {
         }
       );
 
+      console.log('Titles API response received');
       // Parse the generated titles from the response
       const content = response.data.choices[0].message.content;
       let titles: ArticleTitle[] = [];
@@ -133,6 +140,7 @@ export const apiService = {
           score: item.score
         }));
       } catch (parseError) {
+        console.error('Error parsing titles JSON:', parseError);
         // If JSON parsing fails, try to extract titles manually
         const titleMatches = content.match(/(?:"text": "|title: ")([^"]+)(?:")/g) || [];
         const scoreMatches = content.match(/(?:"score": |score: )(\d+)/g) || [];
@@ -150,6 +158,7 @@ export const apiService = {
         });
       }
       
+      console.log('Generated titles:', titles.length);
       return titles;
     } catch (error) {
       console.error('Error generating titles:', error);
@@ -165,6 +174,7 @@ export const apiService = {
   // Fetch secondary keywords based on primary keyword
   fetchSecondaryKeywords: async (primaryKeyword: string): Promise<Keyword[]> => {
     try {
+      console.log('Fetching secondary keywords for:', primaryKeyword);
       // Using SerpAPI for keywords
       const response = await axios.get('https://serpapi.com/search', {
         params: {
@@ -174,6 +184,7 @@ export const apiService = {
         }
       });
       
+      console.log('Secondary keywords API response received');
       // Extract related searches from the response
       const relatedSearches = response.data.related_searches || [];
       const relatedQuestions = response.data.related_questions || [];
@@ -200,6 +211,7 @@ export const apiService = {
         });
       });
       
+      console.log('Secondary keywords processed:', secondaryKeywords.length);
       return secondaryKeywords;
     } catch (error) {
       console.error('Error fetching secondary keywords:', error);
@@ -216,6 +228,7 @@ export const apiService = {
     articleType: string
   ): Promise<OutlineHeading[]> => {
     try {
+      console.log('Generating outline for topic:', topic);
       const response = await axios.post(
         'https://api.openai.com/v1/chat/completions',
         {
@@ -235,7 +248,7 @@ export const apiService = {
               3. Structure that follows logical progression
               4. Natural inclusion of primary and secondary keywords
               
-              Format the response as a JSON array of objects with 'heading' and 'subheadings' properties, where subheadings is an array of strings. Include 7-10 main headings including an introduction and conclusion.`
+              Format the response as a clean JSON array of objects with 'heading' and 'subheadings' properties, where subheadings is an array of strings. Include 7-10 main headings including an introduction and conclusion. IMPORTANT: Return ONLY valid JSON with no markdown code blocks or extra text.`
             }
           ]
         },
@@ -247,11 +260,15 @@ export const apiService = {
         }
       );
       
+      console.log('Outline API response received');
       const content = response.data.choices[0].message.content;
       let outline: OutlineHeading[] = [];
       
       try {
-        outline = JSON.parse(content);
+        // Clean the content to remove any markdown code block markers
+        const cleanedContent = content.replace(/```(?:json)?\n?|\n?```/g, '').trim();
+        console.log('Cleaned content for parsing:', cleanedContent.substring(0, 100) + '...');
+        outline = JSON.parse(cleanedContent);
       } catch (parseError) {
         console.error('Error parsing outline JSON:', parseError);
         
@@ -275,6 +292,7 @@ export const apiService = {
         });
       }
       
+      console.log('Generated outline with sections:', outline.length);
       return outline;
     } catch (error) {
       console.error('Error generating outline:', error);
