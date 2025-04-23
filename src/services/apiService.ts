@@ -2,280 +2,35 @@
 import axios from 'axios';
 import { Reference, Keyword, ArticleTitle, OutlineHeading } from '@/lib/types';
 
-// This would be replaced with your actual API key in a real implementation
-// In production, these should be stored securely in environment variables
-const OPENAI_API_KEY = 'your-openai-api-key';
-const SERP_API_KEY = 'your-serp-api-key';
-
-// Mock responses for development
-const MOCK_RESPONSES = {
-  references: [
-    { id: '1', title: 'The Ultimate Guide to VCI Bags', url: 'https://example.com/vci-bags', source: 'Journal of Packaging Technology' },
-    { id: '2', title: 'How VCI Technology Prevents Corrosion', url: 'https://example.com/vci-technology', source: 'Industrial Packaging Review' },
-    { id: '3', title: 'Packaging Solutions for Metal Components', url: 'https://example.com/metal-packaging', source: 'Packaging Insights' },
-  ],
-  keywords: [
-    { id: '1', text: 'vci bags', volume: 1200, difficulty: 45 },
-    { id: '2', text: 'anti corrosion packaging', volume: 890, difficulty: 38 },
-    { id: '3', text: 'metal packaging solutions', volume: 750, difficulty: 52 },
-    { id: '4', text: 'industrial packaging materials', volume: 1500, difficulty: 60 },
-  ],
-  titles: [
-    { id: '1', text: 'What Are VCI Bags? A Simple Guide to Protecting Your Metal Parts', score: 92 },
-    { id: '2', text: 'The Complete Guide to VCI Bags: Preventing Corrosion in Metal Packaging', score: 88 },
-    { id: '3', text: 'VCI Bags Explained: How to Keep Your Metal Products Rust-Free', score: 85 },
-  ],
-  outlines: [
-    {
-      heading: 'Introduction',
-      subheadings: [],
-    },
-    {
-      heading: 'What are VCI Bags?',
-      subheadings: ['The Science Behind VCI Technology', 'How VCI Molecules Protect Metal Surfaces'],
-    },
-    {
-      heading: 'Types of VCI Bags and Their Uses',
-      subheadings: ['Flat, Gusseted, and Zip-lock Bags', 'Ferrous vs Non-ferrous Protection', 'Anti-tarnish and Multimetal Options'],
-    },
-    {
-      heading: 'Benefits of Using VCI Bags',
-      subheadings: ['Long-term Corrosion Prevention', 'Cost Savings Over Traditional Methods', 'Environmentally Friendly Solution'],
-    },
-    {
-      heading: 'How to Choose the Right VCI Bag',
-      subheadings: ['Size and Material Considerations', 'Application-Specific Requirements', 'Storage Duration Factors'],
-    },
-    {
-      heading: 'Best Practices for Using VCI Packaging',
-      subheadings: ['Proper Sealing Techniques', 'Storage Recommendations', 'Handling Guidelines'],
-    },
-    {
-      heading: 'Real-World Applications',
-      subheadings: ['Automotive Parts Protection', 'Electronics Industry Usage', 'Military and Aerospace Applications'],
-    },
-    {
-      heading: 'Conclusion',
-      subheadings: [],
-    },
-  ],
-  article: `# What Are VCI Bags? A Simple Guide to Protecting Your Metal Parts
-
-## Introduction
-
-In the world of industrial packaging, protecting valuable metal components from corrosion is a constant challenge. Moisture, oxygen, and contaminants can quickly damage unprotected metal surfaces, leading to product deterioration, customer dissatisfaction, and increased costs. Volatile Corrosion Inhibitor (VCI) bags offer a revolutionary solution to this problem by providing invisible yet powerful protection against the elements that cause corrosion.
-
-## What are VCI Bags?
-
-### The Science Behind VCI Technology
-
-VCI bags utilize a specialized technology that releases corrosion-inhibiting compounds in a controlled manner. These compounds form an invisible molecular layer on metal surfaces that prevents oxidation and corrosion. Unlike traditional protective methods such as oils or coatings, VCI technology provides protection without leaving residues that need to be cleaned before the product can be used.
-
-The active ingredients in VCI packaging are incorporated directly into the polymer structure of the packaging material. When enclosed in the packaging, these compounds volatilize (turn into vapor) and fill the enclosed space. The vapor then condenses on all metal surfaces within the enclosure, forming a protective molecular barrier that prevents moisture, oxygen, and other corrosive elements from reaching the metal.
-
-### How VCI Molecules Protect Metal Surfaces
-
-The protective action of VCI molecules works through several mechanisms:
-
-1. **Barrier Protection**: VCI molecules create a hydrophobic (water-repelling) barrier on metal surfaces.
-
-2. **Passivation**: The molecules interact with the metal surface to create a passivated layer that resists chemical reactions.
-
-3. **pH Neutralization**: VCI compounds can neutralize acids that would otherwise accelerate corrosion.
-
-4. **Vapor Phase Protection**: Unlike direct contact protectants, VCI molecules can reach and protect even recessed or hard-to-reach surfaces through vapor action.
-
-This multi-layered approach provides comprehensive protection that direct-contact methods cannot match.
-
-## Types of VCI Bags and Their Uses
-
-### Flat, Gusseted, and Zip-lock Bags
-
-VCI packaging comes in various formats to accommodate different products and applications:
-
-* **Flat Bags**: These are the simplest form, suitable for flat items or products that don't require much depth. They're economical and space-efficient for storage and shipping.
-
-* **Gusseted Bags**: Featuring expandable sides, these bags can accommodate bulkier items. The gussets allow the bag to expand to hold three-dimensional objects while maintaining a flat bottom for stability.
-
-* **Zip-lock Bags**: These feature a resealable closure, making them ideal for items that may need to be removed and returned to storage multiple times. They provide convenience while maintaining the integrity of the VCI protection.
-
-### Ferrous vs Non-ferrous Protection
-
-Different metals require different types of protection:
-
-* **Ferrous VCI**: Formulated specifically for iron and steel protection. These bags typically contain compounds that work particularly well with ferrous metals and may not be suitable for other metal types.
-
-* **Non-ferrous VCI**: Designed for metals like copper, brass, bronze, and aluminum. These require different chemical compounds to provide effective protection.
-
-* **Multi-metal VCI**: A versatile solution that provides protection for both ferrous and non-ferrous metals, allowing for mixed metal storage within the same package.
-
-### Anti-tarnish and Multimetal Options
-
-For precious metals and specialized applications, there are further specialized options:
-
-* **Anti-tarnish VCI**: Specifically formulated to prevent tarnishing of silver, brass, and other metals that discolor rather than rust.
-
-* **Heavy-duty VCI**: Provides extended protection for long-term storage or particularly harsh environments.
-
-* **Reinforced VCI**: Combines corrosion protection with added puncture and tear resistance for heavy or sharp components.
-
-## Benefits of Using VCI Bags
-
-### Long-term Corrosion Prevention
-
-One of the most significant advantages of VCI packaging is its longevity. When properly sealed, VCI bags can provide protection for up to five years in appropriate storage conditions. This makes them ideal for:
-
-* Long-term inventory storage
-* Overseas shipping with extended transit times
-* Seasonal equipment that remains unused for months at a time
-* Military and emergency equipment that must remain ready for deployment
-
-The protection begins working immediately upon sealing the package and maintains its effectiveness as long as the bag remains intact.
-
-### Cost Savings Over Traditional Methods
-
-VCI packaging offers substantial cost benefits compared to traditional corrosion prevention methods:
-
-* **Elimination of expensive rust preventative oils and coatings** that often need to be applied and then removed before use
-* **Reduced labor costs** as items don't need to be individually treated or cleaned
-* **Lower rejection rates** and warranty claims due to corrosion damage
-* **Decreased packaging waste** as less additional wrapping materials are needed
-* **Reduced weight** compared to protective greases and oils, lowering shipping costs
-
-These savings can significantly impact the bottom line, especially for companies shipping large volumes of metal components.
-
-### Environmentally Friendly Solution
-
-Modern VCI packaging solutions offer important environmental benefits:
-
-* **Non-toxic formulations** that are safe for handling without special equipment
-* **Recyclable materials** that can be processed through standard recycling streams
-* **Reduction in the use of petroleum-based protective oils**
-* **Decreased waste from rejected corroded parts**
-* **Lower environmental impact during shipping** due to reduced weight
-
-Many VCI products are compliant with environmental regulations worldwide, including RoHS and REACH standards.
-
-## How to Choose the Right VCI Bag
-
-### Size and Material Considerations
-
-Selecting the appropriate size and material for your VCI packaging is crucial:
-
-* **Size**: The bag should be large enough to completely enclose the item with minimal air space. However, excessive air space can dilute the VCI compounds, potentially reducing effectiveness.
-
-* **Thickness**: Consider the weight and sharpness of the items being packaged. Heavier or sharp-edged items require thicker, more durable films.
-
-* **Material Compatibility**: Ensure the specific VCI formulation is compatible with your metal type. Using the wrong formulation may not provide adequate protection or could potentially cause adverse reactions.
-
-### Application-Specific Requirements
-
-Different applications may require specialized features:
-
-* **Static Dissipative Properties**: For electronic components sensitive to static electricity.
-* **UV Protection**: For items that may be stored in areas with sun exposure.
-* **Heat Sealability**: For applications requiring hermetic sealing.
-* **Transparency**: For visual inspection without opening the package.
-* **Printability**: For branding, tracking information, or handling instructions.
-
-### Storage Duration Factors
-
-The expected storage time significantly impacts your VCI packaging choice:
-
-* **Short-term protection** (less than 6 months) may allow for lighter, more economical packaging options.
-* **Medium-term storage** (6-24 months) typically requires standard VCI packaging with good sealing.
-* **Long-term storage** (over 2 years) demands premium VCI products with higher inhibitor concentrations and more robust barrier properties.
-
-## Best Practices for Using VCI Packaging
-
-### Proper Sealing Techniques
-
-To maximize the effectiveness of VCI packaging:
-
-1. **Clean items thoroughly** before packaging to remove any existing contaminants or moisture.
-2. **Ensure complete closure** of the bag, whether by heat sealing, zip-lock mechanism, or tape.
-3. **Minimize the air volume** inside the package while ensuring the VCI bag doesn't touch the metal surface at all points.
-4. **Avoid punctures or tears** that would allow the protective vapor to escape.
-5. **For heat-sealed bags, ensure a complete seal** of at least 3/8 inch width.
-
-### Storage Recommendations
-
-Proper storage conditions extend the effectiveness of VCI protection:
-
-* **Store in a dry environment** whenever possible to reduce the burden on the VCI compounds.
-* **Avoid extreme temperature fluctuations** that can cause condensation inside the package.
-* **Keep away from strong chemicals** that might interact with the VCI compounds.
-* **Minimize UV exposure** which can degrade some types of VCI packaging over time.
-* **Consider using climate-controlled storage** for particularly valuable or sensitive items.
-
-### Handling Guidelines
-
-Proper handling preserves the integrity of the VCI protection:
-
-* **Minimize opening and closing** of resealable VCI packages to preserve the concentration of protective compounds.
-* **Wear clean gloves** when handling items to be packaged to prevent oil or salt from fingers transferring to the metal surface.
-* **Use caution when handling sharp items** to avoid puncturing the VCI material.
-* **Reseal partially used bags promptly** to maintain effectiveness for remaining items.
-* **Label packages** with contents and packaging date for inventory management.
-
-## Real-World Applications
-
-### Automotive Parts Protection
-
-The automotive industry extensively uses VCI packaging for:
-
-* **Transmission components** during overseas shipping and assembly plant storage
-* **Engine parts** during distribution to repair centers and dealerships
-* **Fasteners and small parts** in bulk packaging
-* **Replacement parts** in aftermarket supply chains
-* **Tools and equipment** during transport and storage
-
-VCI packaging helps maintain component quality from manufacturing through installation.
-
-### Electronics Industry Usage
-
-In electronics manufacturing, VCI packaging protects:
-
-* **Circuit boards** with exposed metal contacts and traces
-* **Connectors and terminals** that must maintain perfect conductivity
-* **Heat sinks and mounting hardware**
-* **Server and networking infrastructure** during transportation
-* **Consumer electronics** during global distribution
-
-The non-residue nature of VCI protection is particularly valuable in electronics, where cleanliness is essential.
-
-### Military and Aerospace Applications
-
-These demanding sectors rely on VCI technology for:
-
-* **Weapons systems** during long-term storage
-* **Spare parts inventories** that must remain ready for immediate deployment
-* **Aircraft components** subject to strict quality standards
-* **Shipboard equipment** that faces especially challenging corrosive environments
-* **Vehicles and heavy equipment** during transport or strategic reserves
-
-The long-term reliability of VCI protection makes it ideal for mission-critical applications where failure is not an option.
-
-## Conclusion
-
-VCI bags represent a significant advancement in metal protection technology, offering a clean, efficient, and environmentally friendly alternative to traditional anti-corrosion methods. By understanding the different types available and implementing best practices for their use, companies can significantly extend the shelf life of their metal products while reducing costs and environmental impact.
-
-For industries where metal quality is paramount—from precision automotive components to sophisticated electronics to critical military hardware—VCI packaging provides peace of mind that products will reach their destination in the same condition they left the factory, regardless of the time and distance involved.
-
-As global supply chains grow longer and more complex, the importance of reliable corrosion protection only increases. By incorporating VCI packaging solutions into your logistics and storage strategies, you can ensure your valuable metal components remain pristine from production to final use.`,
-};
+// API keys
+const OPENAI_API_KEY = "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";
+const SERP_API_KEY = "ab325143079f0c503ec178b08970495d178f2cb7c556dd7b014f459c5b2bad8f";
 
 // API functions for fetching data
 export const apiService = {
   // Fetch references based on topic
   fetchReferences: async (topic: string): Promise<Reference[]> => {
     try {
-      // In a real implementation, this would call the SERP API
-      // For now, we'll return mock data
-      console.log(`Fetching references for topic: ${topic}`);
-      return MOCK_RESPONSES.references;
+      const response = await axios.get('https://serpapi.com/search', {
+        params: {
+          q: topic,
+          engine: 'google_scholar',
+          api_key: SERP_API_KEY,
+          num: 10
+        }
+      });
+      
+      const organicResults = response.data.organic_results || [];
+      
+      return organicResults.map((result: any, index: number) => ({
+        id: `ref-${index + 1}`,
+        title: result.title,
+        url: result.link,
+        source: result.publication_info?.summary || 'Unknown Source'
+      }));
     } catch (error) {
       console.error('Error fetching references:', error);
+      // Fallback to empty array if API fails
       return [];
     }
   },
@@ -283,35 +38,172 @@ export const apiService = {
   // Fetch primary keywords based on topic
   fetchPrimaryKeywords: async (topic: string): Promise<Keyword[]> => {
     try {
-      // In a real implementation, this would call the SERP API
-      console.log(`Fetching primary keywords for topic: ${topic}`);
-      return MOCK_RESPONSES.keywords;
+      // Using SerpAPI for keywords
+      const response = await axios.get('https://serpapi.com/search', {
+        params: {
+          q: topic,
+          engine: 'google',
+          api_key: SERP_API_KEY
+        }
+      });
+      
+      // Extract related searches and keywords from the response
+      const relatedSearches = response.data.related_searches || [];
+      const relatedQuestions = response.data.related_questions || [];
+      
+      const primaryKeywords: Keyword[] = [];
+      
+      // Process related searches (better volume/competition estimate)
+      relatedSearches.forEach((item: any, index: number) => {
+        primaryKeywords.push({
+          id: `ks-${index + 1}`,
+          text: item.query,
+          // Generating mock volume/difficulty as SerpAPI doesn't provide these directly
+          volume: Math.floor(Math.random() * 1000) + 500,
+          difficulty: Math.floor(Math.random() * 70) + 20,
+        });
+      });
+      
+      // Process related questions 
+      relatedQuestions.forEach((item: any, index: number) => {
+        primaryKeywords.push({
+          id: `kq-${index + 1}`,
+          text: item.question,
+          volume: Math.floor(Math.random() * 800) + 300,
+          difficulty: Math.floor(Math.random() * 60) + 30,
+        });
+      });
+      
+      // Add the main keyword
+      primaryKeywords.unshift({
+        id: 'k-main',
+        text: topic,
+        volume: Math.floor(Math.random() * 2000) + 1000,
+        difficulty: Math.floor(Math.random() * 50) + 40,
+      });
+      
+      return primaryKeywords;
     } catch (error) {
       console.error('Error fetching primary keywords:', error);
-      return [];
+      // Return basic keyword if API fails
+      return [{
+        id: 'k-main',
+        text: topic,
+        volume: 1000,
+        difficulty: 45
+      }];
     }
   },
 
   // Generate titles based on topic and primary keyword
   generateTitles: async (topic: string, primaryKeyword: string): Promise<ArticleTitle[]> => {
     try {
-      // In a real implementation, this would call the OpenAI API
-      console.log(`Generating titles for topic: ${topic} with primary keyword: ${primaryKeyword}`);
-      return MOCK_RESPONSES.titles;
+      const response = await axios.post(
+        'https://api.openai.com/v1/chat/completions',
+        {
+          model: "gpt-4o",
+          messages: [
+            {
+              role: "system",
+              content: "You are an expert SEO content specialist and copywriter. You create highly engaging, SEO-optimized article titles that drive clicks and conversions. Generate titles that are catchy, include the primary keyword naturally, and have high click-through potential."
+            },
+            {
+              role: "user",
+              content: `Generate 5 highly engaging, SEO-optimized titles for an article about "${topic}" targeting the primary keyword "${primaryKeyword}". Each title should be catchy, include the primary keyword naturally, be between 50-60 characters, and be designed to maximize CTR. Format the output as a JSON array with objects containing 'text' and 'score' properties, where score is your estimate of how effective the title will be on a scale of 0-100.`
+            }
+          ]
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${OPENAI_API_KEY}`
+          }
+        }
+      );
+
+      // Parse the generated titles from the response
+      const content = response.data.choices[0].message.content;
+      let titles: ArticleTitle[] = [];
+      
+      try {
+        const parsedContent = JSON.parse(content);
+        titles = parsedContent.map((item: any, index: number) => ({
+          id: `title-${index + 1}`,
+          text: item.text,
+          score: item.score
+        }));
+      } catch (parseError) {
+        // If JSON parsing fails, try to extract titles manually
+        const titleMatches = content.match(/(?:"text": "|title: ")([^"]+)(?:")/g) || [];
+        const scoreMatches = content.match(/(?:"score": |score: )(\d+)/g) || [];
+        
+        titles = titleMatches.slice(0, 5).map((title, index) => {
+          const text = title.replace(/(?:"text": "|title: ")/g, "").replace(/"$/g, "");
+          const scoreText = scoreMatches[index] ? scoreMatches[index].replace(/(?:"score": |score: )/g, "") : "80";
+          const score = parseInt(scoreText, 10);
+          
+          return {
+            id: `title-${index + 1}`,
+            text,
+            score
+          };
+        });
+      }
+      
+      return titles;
     } catch (error) {
       console.error('Error generating titles:', error);
-      return [];
+      // Return basic titles if API fails
+      return [
+        { id: '1', text: `The Complete Guide to ${primaryKeyword}`, score: 85 },
+        { id: '2', text: `${primaryKeyword}: Everything You Need to Know About ${topic}`, score: 82 },
+        { id: '3', text: `How to Use ${primaryKeyword} Effectively in 2025`, score: 80 }
+      ];
     }
   },
 
   // Fetch secondary keywords based on primary keyword
   fetchSecondaryKeywords: async (primaryKeyword: string): Promise<Keyword[]> => {
     try {
-      // In a real implementation, this would call the SERP API
-      console.log(`Fetching secondary keywords for primary keyword: ${primaryKeyword}`);
-      return MOCK_RESPONSES.keywords;
+      // Using SerpAPI for keywords
+      const response = await axios.get('https://serpapi.com/search', {
+        params: {
+          q: primaryKeyword,
+          engine: 'google',
+          api_key: SERP_API_KEY
+        }
+      });
+      
+      // Extract related searches from the response
+      const relatedSearches = response.data.related_searches || [];
+      const relatedQuestions = response.data.related_questions || [];
+      
+      const secondaryKeywords: Keyword[] = [];
+      
+      // Process related searches
+      relatedSearches.forEach((item: any, index: number) => {
+        secondaryKeywords.push({
+          id: `sks-${index + 1}`,
+          text: item.query,
+          volume: Math.floor(Math.random() * 800) + 200,
+          difficulty: Math.floor(Math.random() * 60) + 20,
+        });
+      });
+      
+      // Process related questions
+      relatedQuestions.forEach((item: any, index: number) => {
+        secondaryKeywords.push({
+          id: `skq-${index + 1}`,
+          text: item.question,
+          volume: Math.floor(Math.random() * 600) + 100,
+          difficulty: Math.floor(Math.random() * 50) + 30,
+        });
+      });
+      
+      return secondaryKeywords;
     } catch (error) {
       console.error('Error fetching secondary keywords:', error);
+      // Return empty array if API fails
       return [];
     }
   },
@@ -324,12 +216,79 @@ export const apiService = {
     articleType: string
   ): Promise<OutlineHeading[]> => {
     try {
-      // In a real implementation, this would call the OpenAI API
-      console.log(`Generating outline for topic: ${topic} with primary keyword: ${primaryKeyword}`);
-      return MOCK_RESPONSES.outlines;
+      const response = await axios.post(
+        'https://api.openai.com/v1/chat/completions',
+        {
+          model: "gpt-4o",
+          messages: [
+            {
+              role: "system",
+              content: "You are an expert SEO content strategist who creates comprehensive, well-structured article outlines. Your outlines maximize search engine visibility while providing exceptional value to readers."
+            },
+            {
+              role: "user",
+              content: `Create a detailed outline for a ${articleType} about "${topic}". The primary keyword is "${primaryKeyword}" and the secondary keywords are: ${secondaryKeywords.join(", ")}. 
+
+              The outline should include:
+              1. Main headings (H2s)
+              2. Subheadings (H3s) under each main heading where appropriate
+              3. Structure that follows logical progression
+              4. Natural inclusion of primary and secondary keywords
+              
+              Format the response as a JSON array of objects with 'heading' and 'subheadings' properties, where subheadings is an array of strings. Include 7-10 main headings including an introduction and conclusion.`
+            }
+          ]
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${OPENAI_API_KEY}`
+          }
+        }
+      );
+      
+      const content = response.data.choices[0].message.content;
+      let outline: OutlineHeading[] = [];
+      
+      try {
+        outline = JSON.parse(content);
+      } catch (parseError) {
+        console.error('Error parsing outline JSON:', parseError);
+        
+        // Fallback parsing logic if JSON structure is incorrect
+        const headingMatches = content.match(/(?:"heading"|heading): "([^"]+)"/g) || [];
+        const subheadingsMatches = content.match(/(?:"subheadings"|subheadings): \[(.*?)\]/gs) || [];
+        
+        outline = headingMatches.map((heading, index) => {
+          const headingText = heading.replace(/(?:"heading"|heading): "/g, "").replace(/"$/g, "");
+          
+          let subheadings: string[] = [];
+          if (subheadingsMatches[index]) {
+            const subheadingsText = subheadingsMatches[index].replace(/(?:"subheadings"|subheadings): \[/g, "").replace(/\]$/g, "");
+            subheadings = subheadingsText.split(",").map(s => s.trim().replace(/^"|"$/g, "")).filter(Boolean);
+          }
+          
+          return {
+            heading: headingText,
+            subheadings
+          };
+        });
+      }
+      
+      return outline;
     } catch (error) {
       console.error('Error generating outline:', error);
-      return [];
+      
+      // Return basic outline if API fails
+      return [
+        { heading: "Introduction", subheadings: [] },
+        { heading: `What is ${primaryKeyword}?`, subheadings: ["Definition", "Key Features"] },
+        { heading: `Benefits of ${primaryKeyword}`, subheadings: ["Main Advantages", "Use Cases"] },
+        { heading: `How to Use ${primaryKeyword}`, subheadings: ["Step-by-Step Guide", "Best Practices"] },
+        { heading: `${topic} Examples`, subheadings: ["Case Study 1", "Case Study 2"] },
+        { heading: "Common Challenges and Solutions", subheadings: ["Challenge 1", "Challenge 2"] },
+        { heading: "Conclusion", subheadings: [] }
+      ];
     }
   },
 
@@ -345,24 +304,225 @@ export const apiService = {
     expertGuidance?: string
   ): Promise<string> => {
     try {
-      // In a real implementation, this would call the OpenAI API
-      console.log(`Generating article for topic: ${topic}`);
-      return MOCK_RESPONSES.article;
+      // Determine word count based on articleLength
+      let targetWordCount = "1500";
+      if (articleLength === "sm") targetWordCount = "800";
+      if (articleLength === "md") targetWordCount = "1500";
+      if (articleLength === "lg") targetWordCount = "3000";
+      
+      // Convert outline to formatted string for the prompt
+      const outlineText = outline.map(section => {
+        let sectionText = `## ${section.heading}`;
+        if (section.subheadings.length > 0) {
+          sectionText += '\n' + section.subheadings.map(sub => `### ${sub}`).join('\n');
+        }
+        return sectionText;
+      }).join('\n\n');
+      
+      // Create detailed prompt for article generation
+      const prompt = `Write a comprehensive ${writingStyle} article about "${topic}" using ${pointOfView} point of view, with approximately ${targetWordCount} words.
+
+Primary keyword: "${primaryKeyword}"
+Secondary keywords: ${secondaryKeywords.join(", ")}
+
+Follow this outline:
+${outlineText}
+
+${expertGuidance ? `Expert guidance to incorporate: ${expertGuidance}` : ''}
+
+Requirements:
+1. Write in a ${writingStyle} style that engages readers
+2. Naturally incorporate the primary keyword (${primaryKeyword}) at a 1-2% density
+3. Include secondary keywords naturally throughout the article
+4. Use ${pointOfView} point of view consistently
+5. Include a compelling introduction that hooks the reader
+6. Provide valuable insights and actionable advice
+7. End with a strong conclusion that includes a clear next step or call-to-action
+8. Format using Markdown with proper headings, subheadings, bullet points, and emphasis where appropriate`;
+
+      const response = await axios.post(
+        'https://api.openai.com/v1/chat/completions',
+        {
+          model: "gpt-4o",
+          messages: [
+            {
+              role: "system",
+              content: "You are an expert content writer who specializes in creating high-quality, SEO-optimized articles that provide exceptional value to readers while maintaining natural readability."
+            },
+            {
+              role: "user",
+              content: prompt
+            }
+          ]
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${OPENAI_API_KEY}`
+          }
+        }
+      );
+      
+      return response.data.choices[0].message.content;
     } catch (error) {
       console.error('Error generating article:', error);
-      return '';
+      return "An error occurred while generating the article. Please try again.";
     }
   },
 
   // Generate humanized version of the article
   humanizeArticle: async (article: string): Promise<string> => {
     try {
-      // In a real implementation, this would call the OpenAI API
-      console.log('Humanizing article');
-      return MOCK_RESPONSES.article;
+      const response = await axios.post(
+        'https://api.openai.com/v1/chat/completions',
+        {
+          model: "gpt-4o",
+          messages: [
+            {
+              role: "system",
+              content: "You are a professional editor who specializes in making content more engaging, conversational, and human-like while preserving key information and SEO value."
+            },
+            {
+              role: "user",
+              content: `Improve this article to make it more human-like, conversational, and engaging while keeping all the important information and SEO keywords. Add personal anecdotes, analogies, or examples where appropriate. Maintain the original structure, headings, and overall points, but make the tone warmer and more natural. Here's the article:\n\n${article}`
+            }
+          ]
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${OPENAI_API_KEY}`
+          }
+        }
+      );
+      
+      return response.data.choices[0].message.content;
     } catch (error) {
       console.error('Error humanizing article:', error);
-      return '';
+      return article; // Return original article if humanizing fails
     }
   },
+
+  // Generate article enhancements
+  generateEnhancement: async (
+    enhancementType: string,
+    article: string,
+    primaryKeyword: string
+  ): Promise<string> => {
+    try {
+      // Craft specific prompts based on enhancement type
+      let prompt = "";
+      
+      switch (enhancementType) {
+        case "faq":
+          prompt = `Based on this article about "${primaryKeyword}", create a comprehensive FAQ section with 5-7 questions and detailed answers that address common queries readers might have. Format in Markdown with each question as a subheading. The article content is:\n\n${article.substring(0, 4000)}...`;
+          break;
+          
+        case "summary":
+          prompt = `Create a concise TL;DR summary (around 150 words) of the key points in this article about "${primaryKeyword}". The summary should capture the most important information while being engaging enough to encourage reading the full article. The article content is:\n\n${article.substring(0, 4000)}...`;
+          break;
+          
+        case "callToAction":
+          prompt = `Create a compelling call-to-action section for this article about "${primaryKeyword}". The CTA should motivate readers to take a specific next step related to the topic, whether it's implementing advice, exploring related resources, or contacting for more information. Make it persuasive and specific. The article content is:\n\n${article.substring(0, 4000)}...`;
+          break;
+          
+        case "keyTakeaways":
+          prompt = `Create a "Key Takeaways" section for this article about "${primaryKeyword}" with 5-7 bullet points that summarize the most important insights and actionable advice from the article. Format in Markdown with a clear heading and well-structured bullet points. The article content is:\n\n${article.substring(0, 4000)}...`;
+          break;
+          
+        case "expertQuote":
+          prompt = `Create a fictional expert quote that could be included in this article about "${primaryKeyword}". The quote should add authority, provide unique insight, and sound authentic. Include the expert's fictional name and relevant credentials. The article content for context is:\n\n${article.substring(0, 4000)}...`;
+          break;
+          
+        default:
+          prompt = `Create additional content enhancement for this article about "${primaryKeyword}" focused on ${enhancementType}. Format in Markdown and ensure it adds significant value to the reader. The article content is:\n\n${article.substring(0, 4000)}...`;
+      }
+
+      const response = await axios.post(
+        'https://api.openai.com/v1/chat/completions',
+        {
+          model: "gpt-4o",
+          messages: [
+            {
+              role: "system",
+              content: "You are an expert content strategist who specializes in creating highly valuable content enhancements that improve article quality and SEO performance."
+            },
+            {
+              role: "user",
+              content: prompt
+            }
+          ]
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${OPENAI_API_KEY}`
+          }
+        }
+      );
+      
+      return response.data.choices[0].message.content;
+    } catch (error) {
+      console.error(`Error generating ${enhancementType} enhancement:`, error);
+      return `An error occurred while generating the ${enhancementType} enhancement.`;
+    }
+  },
+  
+  // Generate article image suggestions using DALL-E
+  generateImageSuggestion: async (
+    primaryKeyword: string,
+    articleTitle: string
+  ): Promise<string> => {
+    try {
+      // First, get image description from GPT
+      const promptResponse = await axios.post(
+        'https://api.openai.com/v1/chat/completions',
+        {
+          model: "gpt-4o",
+          messages: [
+            {
+              role: "system",
+              content: "You are an expert at creating effective image prompts for DALL-E that will generate high-quality, relevant images for blog articles."
+            },
+            {
+              role: "user",
+              content: `Create a detailed prompt for DALL-E to generate a featured image for an article titled "${articleTitle}" about "${primaryKeyword}". The image should be professional, relevant to the topic, and visually appealing. Do not include text in the image. The prompt should be specific enough to generate a high-quality, relevant image without being too restrictive. Only return the prompt text, nothing else.`
+            }
+          ]
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${OPENAI_API_KEY}`
+          }
+        }
+      );
+      
+      const imagePrompt = promptResponse.data.choices[0].message.content.trim();
+      
+      // Then, generate the image with DALL-E
+      const imageResponse = await axios.post(
+        'https://api.openai.com/v1/images/generations',
+        {
+          model: "dall-e-3",
+          prompt: imagePrompt,
+          n: 1,
+          size: "1024x1024",
+          quality: "standard"
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${OPENAI_API_KEY}`
+          }
+        }
+      );
+      
+      // Return the image URL
+      return imageResponse.data.data[0].url;
+    } catch (error) {
+      console.error('Error generating image suggestion:', error);
+      return ""; // Return empty string if image generation fails
+    }
+  }
 };

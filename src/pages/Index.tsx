@@ -8,6 +8,9 @@ import { Step4PrimaryKeyword } from "@/components/article-steps/Step4PrimaryKeyw
 import { Step5Title } from "@/components/article-steps/Step5Title";
 import { Step6SecondaryKeywords } from "@/components/article-steps/Step6SecondaryKeywords";
 import { Step7Configuration } from "@/components/article-steps/Step7Configuration";
+import { Step8ArticleOutline } from "@/components/article-steps/Step8ArticleOutline";
+import { Step9ArticleEnhancements } from "@/components/article-steps/Step9ArticleEnhancements";
+import { Step10ArticleGeneration } from "@/components/article-steps/Step10ArticleGeneration";
 import { useArticle } from "@/context/ArticleContext";
 
 // This component will render the appropriate step based on the current state
@@ -30,37 +33,15 @@ const StepContent = () => {
     case 7:
       return <Step7Configuration />;
     case 8:
-      return <ArticleOutline />;
+      return <Step8ArticleOutline />;
     case 9:
-      return <ArticleEnhancements />;
+      return <Step9ArticleEnhancements />;
     case 10:
-      return <ArticleGeneration />;
+      return <Step10ArticleGeneration />;
     default:
       return <Step1Topic />;
   }
 };
-
-// Placeholder components for steps 8-10 until we implement them
-const ArticleOutline = () => (
-  <div className="space-y-4">
-    <h2 className="text-xl font-semibold">Customize Article Outline</h2>
-    <p className="text-gray-600">This feature will be implemented soon. Here you will be able to customize the outline of your article.</p>
-  </div>
-);
-
-const ArticleEnhancements = () => (
-  <div className="space-y-4">
-    <h2 className="text-xl font-semibold">Add Enhancements</h2>
-    <p className="text-gray-600">This feature will be implemented soon. Here you will be able to add enhancements to your article like FAQs, call-to-actions, and more.</p>
-  </div>
-);
-
-const ArticleGeneration = () => (
-  <div className="space-y-4">
-    <h2 className="text-xl font-semibold">Article Generation</h2>
-    <p className="text-gray-600">This feature will be implemented soon. Here you will be able to generate and review your article.</p>
-  </div>
-);
 
 const Index = () => {
   return (
