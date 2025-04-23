@@ -1,13 +1,13 @@
 
 import { ArticleLayout } from "@/components/layout/ArticleLayout";
 import { ArticleProvider } from "@/context/ArticleContext";
-import Step1Topic from "@/components/article-steps/Step1Topic";
-import Step2ArticleType from "@/components/article-steps/Step2ArticleType";
-import Step3References from "@/components/article-steps/Step3References";
-import Step4PrimaryKeyword from "@/components/article-steps/Step4PrimaryKeyword";
-import Step5Title from "@/components/article-steps/Step5Title";
-import Step6SecondaryKeywords from "@/components/article-steps/Step6SecondaryKeywords";
-import Step7Configuration from "@/components/article-steps/Step7Configuration";
+import { Step1Topic } from "@/components/article-steps/Step1Topic";
+import { Step2ArticleType } from "@/components/article-steps/Step2ArticleType";
+import { Step3References } from "@/components/article-steps/Step3References";
+import { Step4PrimaryKeyword } from "@/components/article-steps/Step4PrimaryKeyword";
+import { Step5Title } from "@/components/article-steps/Step5Title";
+import { Step6SecondaryKeywords } from "@/components/article-steps/Step6SecondaryKeywords";
+import { Step7Configuration } from "@/components/article-steps/Step7Configuration";
 import { useArticle } from "@/context/ArticleContext";
 
 // This component will render the appropriate step based on the current state

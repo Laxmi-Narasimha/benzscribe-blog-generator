@@ -1,5 +1,5 @@
 
-import { Step, ArticleType, ArticleLength, WritingStyle, PointOfView, ResearchMethod } from "./types";
+import { Step, ArticleType, ArticleLength, WritingStyle, PointOfView, ResearchMethod, Country, Language } from "./types";
 
 export const STEPS: Step[] = [
   { id: 1, name: "Topic" },
@@ -43,6 +43,9 @@ export const POINTS_OF_VIEW: PointOfView[] = [
   { id: "third", name: "Third Person (They, It)" },
 ];
 
+// This is needed in Step7Configuration.tsx
+export const WRITING_POINTS_OF_VIEW = POINTS_OF_VIEW;
+
 export const RESEARCH_METHODS: ResearchMethod[] = [
   {
     id: "web-search",
@@ -63,4 +66,41 @@ export const RESEARCH_METHODS: ResearchMethod[] = [
     description: "Include insights from subject-matter experts",
     benefits: ["Credibility", "Unique insights"],
   },
+];
+
+// Adding the missing constants needed by Step1Topic.tsx
+export const SAMPLE_PACKAGING_TOPICS: string[] = [
+  "VCI Packaging",
+  "Sustainable Packaging Solutions",
+  "Anti-Corrosion Packaging",
+  "Industrial Packaging Materials",
+  "Export Packaging Solutions",
+  "Desiccant Solutions",
+  "Moisture Barrier Bags",
+  "Military Specification Packaging",
+  "Rust Prevention Methods",
+  "Stretch Films and Applications",
+];
+
+export const COUNTRIES: Country[] = [
+  { id: "us", name: "United States", flag: "🇺🇸" },
+  { id: "uk", name: "United Kingdom", flag: "🇬🇧" },
+  { id: "ca", name: "Canada", flag: "🇨🇦" },
+  { id: "au", name: "Australia", flag: "🇦🇺" },
+  { id: "in", name: "India", flag: "🇮🇳" },
+  { id: "de", name: "Germany", flag: "🇩🇪" },
+  { id: "fr", name: "France", flag: "🇫🇷" },
+  { id: "jp", name: "Japan", flag: "🇯🇵" },
+];
+
+export const LANGUAGES: Language[] = [
+  { id: "en", name: "English", flag: "🇺🇸" },
+  { id: "es", name: "Spanish", flag: "🇪🇸" },
+  { id: "fr", name: "French", flag: "🇫🇷" },
+  { id: "de", name: "German", flag: "🇩🇪" },
+  { id: "it", name: "Italian", flag: "🇮🇹" },
+  { id: "pt", name: "Portuguese", flag: "🇵🇹" },
+  { id: "ja", name: "Japanese", flag: "🇯🇵" },
+  { id: "zh", name: "Chinese", flag: "🇨🇳" },
+  { id: "hi", name: "Hindi", flag: "🇮🇳" },
 ];
