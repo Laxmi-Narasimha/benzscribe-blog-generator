@@ -48,7 +48,7 @@ export function Step8ArticleOutline() {
           toast({
             title: "Outline Generated",
             description: "Your article outline has been successfully generated.",
-            variant: "success",
+            variant: "default", // Changed from "success" to "default"
           });
         } catch (error) {
           console.error("Error generating outline:", error);
@@ -81,7 +81,7 @@ export function Step8ArticleOutline() {
     toast({
       title: "Outline Saved",
       description: "Your article outline has been saved successfully.",
-      variant: "success",
+      variant: "default", // Changed from "success" to "default"
     });
   };
 
@@ -110,7 +110,7 @@ export function Step8ArticleOutline() {
       toast({
         title: "Outline Regenerated",
         description: "Your article outline has been regenerated successfully.",
-        variant: "success",
+        variant: "default", // Changed from "success" to "default"
       });
     } catch (error) {
       console.error("Error regenerating outline:", error);

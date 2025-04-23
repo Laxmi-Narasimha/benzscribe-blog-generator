@@ -118,7 +118,7 @@ export function Step9ArticleEnhancements() {
     toast({
       title: "Enhancements Saved",
       description: `${selectedEnhancements.length} enhancement${selectedEnhancements.length !== 1 ? 's' : ''} have been saved for your article.`,
-      variant: "success"
+      variant: "default", // Changed from "success" to "default"
     });
   };
 
@@ -166,7 +166,7 @@ export function Step9ArticleEnhancements() {
       toast({
         title: "Preview Generated",
         description: "Enhancement preview has been successfully generated.",
-        variant: "success"
+        variant: "default", // Changed from "success" to "default"
       });
     } catch (error) {
       console.error("Error generating enhancement preview:", error);
@@ -213,7 +213,7 @@ export function Step9ArticleEnhancements() {
         toast({
           title: "Image Generated",
           description: "An AI-generated image has been created for your article.",
-          variant: "success"
+          variant: "default", // Changed from "success" to "default"
         });
       } else {
         throw new Error("No image URL returned");

@@ -43,7 +43,7 @@ export function Step10ArticleGeneration() {
           toast({
             title: "Article Generated",
             description: "Your article has been successfully generated.",
-            variant: "success",
+            variant: "default", // Changed from "success" to "default"
           });
         } catch (error) {
           console.error("Error generating article:", error);
@@ -95,7 +95,7 @@ export function Step10ArticleGeneration() {
       toast({
         title: "Article Regenerated",
         description: "Your article has been successfully regenerated.",
-        variant: "success",
+        variant: "default", // Changed from "success" to "default"
       });
     } catch (error) {
       console.error("Error regenerating article:", error);
@@ -127,7 +127,7 @@ export function Step10ArticleGeneration() {
       toast({
         title: "Article Humanized",
         description: "Your article has been successfully humanized.",
-        variant: "success",
+        variant: "default", // Changed from "success" to "default"
       });
       
       // Switch to humanized tab
@@ -211,7 +211,7 @@ export function Step10ArticleGeneration() {
     toast({
       title: "Download Started",
       description: `Your article is being downloaded as a ${downloadFormat.toUpperCase()} file.`,
-      variant: "success",
+      variant: "default", // Changed from "success" to "default"
     });
   };
 
