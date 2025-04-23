@@ -1,9 +1,6 @@
-
 import { Link } from "react-router-dom";
-
 export function AppHeader() {
-  return (
-    <header className="sticky top-0 z-50 w-full border-b bg-white">
+  return <header className="sticky top-0 z-50 w-full border-b bg-white">
       <div className="container flex h-16 items-center px-4 sm:px-6">
         <div className="flex items-center">
           <Link to="/" className="flex items-center space-x-2">
@@ -18,17 +15,13 @@ export function AppHeader() {
             <Link to="/" className="text-sm font-medium transition-colors hover:text-blue-600">
               Dashboard
             </Link>
-            <Link to="/articles" className="text-sm font-medium transition-colors hover:text-blue-600">
-              My Articles
-            </Link>
+            <Link to="/articles" className="text-sm font-medium transition-colors hover:text-blue-600">My Articles</Link>
             <Link to="/templates" className="text-sm font-medium transition-colors hover:text-blue-600">
               Templates
             </Link>
           </nav>
           <div className="ml-4 flex items-center space-x-4">
-            <button 
-              className="inline-flex items-center justify-center text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input hover:bg-accent hover:text-accent-foreground h-9 rounded-md px-3"
-            >
+            <button className="inline-flex items-center justify-center text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input hover:bg-accent hover:text-accent-foreground h-9 rounded-md px-3">
               Settings
             </button>
             <div className="relative">
@@ -39,6 +32,5 @@ export function AppHeader() {
           </div>
         </div>
       </div>
-    </header>
-  );
+    </header>;
 }
