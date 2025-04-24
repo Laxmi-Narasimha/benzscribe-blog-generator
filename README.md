@@ -1,6 +1,6 @@
-# Benz Scribe Creative Craft
+# Benz Scribe by Laxmi Narasimha for Benz Packaging Solutions (P) Ltd.
 
-A modern article writing assistant with AI-powered content tools.
+A modern article/blog writing assistant with AI-powered content tools.
 
 ## Features
 
