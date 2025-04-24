@@ -1,4 +1,4 @@
-# Benz Scribe by Laxmi Narasimha for Benz Packaging Solutions (P) Ltd.
+# Benz Scribe by Benz Packaging Solutions (P) Ltd.
 
 A modern article/blog writing assistant with AI-powered content tools.
 
