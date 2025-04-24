@@ -1,4 +1,3 @@
-
 export type ArticleType = {
   id: string;
   name: string;
@@ -100,6 +99,7 @@ export type ArticleState = {
   expertGuidance: string;
   outline: OutlineHeading[];
   enhancements: string[];
+  enhancementContent: Record<string, string>;
   targetCountry: string;
   language: string;
   generatedArticle: string;

@@ -1,7 +1,7 @@
 
 import * as React from "react";
 import { useArticle } from "@/context/ArticleContext";
-import { ArticleLayout } from "@/components/layout/ArticleLayout";
+
 import { apiService } from "@/services/apiService";
 import { ArticleTitle } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
@@ -103,7 +103,7 @@ export function Step5Title() {
   const isNextDisabled = !selectedTitleId;
 
   return (
-    <ArticleLayout nextDisabled={isNextDisabled} loading={loading}>
+    
       <div className="space-y-8">
         <div>
           <h2 className="text-xl font-medium mb-4">Select a Title</h2>
@@ -228,6 +228,6 @@ export function Step5Title() {
           </div>
         )}
       </div>
-    </ArticleLayout>
+    
   );
 }

@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useReducer, ReactNode } from 'react';
 import { ArticleState, Reference, Keyword, ArticleTitle, OutlineHeading } from '@/lib/types';
 
@@ -20,6 +19,7 @@ type ArticleAction =
   | { type: 'SET_LANGUAGE'; payload: string }
   | { type: 'SET_GENERATED_ARTICLE'; payload: string }
   | { type: 'SET_HUMANIZED_ARTICLE'; payload: string }
+  | { type: 'SET_ENHANCEMENT_CONTENT'; payload: { id: string; content: string } }
   | { type: 'RESET' };
 
 const initialState: ArticleState = {
@@ -36,6 +36,7 @@ const initialState: ArticleState = {
   expertGuidance: '',
   outline: [],
   enhancements: [],
+  enhancementContent: {},
   targetCountry: 'us',
   language: 'en',
   generatedArticle: '',
@@ -78,8 +79,16 @@ const articleReducer = (state: ArticleState, action: ArticleAction): ArticleStat
       return { ...state, generatedArticle: action.payload };
     case 'SET_HUMANIZED_ARTICLE':
       return { ...state, humanizedArticle: action.payload };
+    case 'SET_ENHANCEMENT_CONTENT':
+      return {
+        ...state,
+        enhancementContent: {
+          ...state.enhancementContent,
+          [action.payload.id]: action.payload.content,
+        },
+      };
     case 'RESET':
-      return initialState;
+      return { ...initialState, enhancementContent: {} };
     default:
       return state;
   }

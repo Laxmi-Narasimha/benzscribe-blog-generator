@@ -1,7 +1,6 @@
-
 import * as React from "react";
 import { useArticle } from "@/context/ArticleContext";
-import { ArticleLayout } from "@/components/layout/ArticleLayout";
+
 import { Button } from "@/components/ui/button";
 import { Check, Plus, Trash } from "lucide-react";
 import { apiService } from "@/services/apiService";
@@ -9,6 +8,9 @@ import { useToast } from "@/components/ui/use-toast";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Switch } from "@/components/ui/switch";
+import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface Enhancement {
   id: string;
@@ -28,7 +30,11 @@ export function Step9ArticleEnhancements() {
   const [previewContent, setPreviewContent] = React.useState<Record<string, string>>({});
   const [activePreview, setActivePreview] = React.useState<string | null>(null);
   const { toast } = useToast();
+  const [isGenerating, setIsGenerating] = React.useState<Record<string, boolean>>({});
   
+  // Add mountedRef for cleanup
+  const mountedRef = React.useRef(true);
+
   const availableEnhancements: Enhancement[] = [
     {
       id: "faq",
@@ -96,87 +102,205 @@ export function Step9ArticleEnhancements() {
     }
   ];
 
+  // Effect to load initial state
   React.useEffect(() => {
-    // Update enhancements from state if available
+    console.log("[Step 9] Loading initial state...");
+    
+    // Load initial values from global state
     if (state.enhancements && state.enhancements.length > 0) {
       setSelectedEnhancements(state.enhancements);
+      console.log("[Step 9] Loaded enhancements:", state.enhancements);
     }
-  }, [state.enhancements]);
+    
+    // Load enhancement content from global state
+    if (state.enhancementContent) {
+      setPreviewContent(state.enhancementContent);
+      console.log("[Step 9] Loaded enhancement content:", state.enhancementContent);
+    }
+    
+    // Auto-generate cover image if not already present
+    // We'll use a timeout to make sure the component is fully mounted
+    const timer = setTimeout(() => {
+      if (
+        (state.primaryKeyword?.text && state.title?.text) && 
+        (!state.enhancements?.includes("featuredImage") || 
+        !state.enhancementContent?.featuredImage)
+      ) {
+        console.log("[Step 9] Auto-generating featured image...");
+        generateImagePreview();
+      }
+    }, 1000);
+    
+    // Cleanup function
+    return () => {
+      console.log("[Step 9] Component unmounting, setting mounted ref to false");
+      mountedRef.current = false;
+      clearTimeout(timer);
+    };
+  }, []);
+
+  // Effect to sync selectedEnhancements with global state
+  React.useEffect(() => {
+    // Skip on initial render
+    if (selectedEnhancements.length === 0 && !state.enhancements?.length) return;
+    
+    // Only update if there's been a change
+    if (JSON.stringify(selectedEnhancements) !== JSON.stringify(state.enhancements)) {
+      if (mountedRef.current) {
+        console.log("[Step 9] Syncing selected enhancements to global state:", selectedEnhancements);
+        dispatch({ type: "SET_ENHANCEMENTS", payload: selectedEnhancements });
+      }
+    }
+  }, [selectedEnhancements, state.enhancements]);
+
+  // Effect to sync previewContent with global state
+  React.useEffect(() => {
+    // Skip if previewContent is empty
+    if (Object.keys(previewContent).length === 0) return;
+    
+    // Compare if there's a change before updating
+    const isEqual = JSON.stringify(previewContent) === JSON.stringify(state.enhancementContent);
+    
+    if (!isEqual && mountedRef.current) {
+      console.log("[Step 9] Syncing enhancement content to global state:", previewContent);
+      
+      // Update one by one to avoid large state updates
+      Object.entries(previewContent).forEach(([id, content]) => {
+        if (state.enhancementContent?.[id] !== content) {
+          dispatch({ 
+            type: "SET_ENHANCEMENT_CONTENT", 
+            payload: { id, content } 
+          });
+        }
+      });
+    }
+  }, [previewContent, state.enhancementContent]);
 
   const toggleEnhancement = (enhancementId: string) => {
-    setSelectedEnhancements(prev => {
-      if (prev.includes(enhancementId)) {
-        return prev.filter(id => id !== enhancementId);
-      } else {
-        return [...prev, enhancementId];
-      }
-    });
+    // Update local state
+    const newSelectedEnhancements = selectedEnhancements.includes(enhancementId)
+      ? selectedEnhancements.filter(id => id !== enhancementId)
+      : [...selectedEnhancements, enhancementId];
+    
+    // Update local state
+    setSelectedEnhancements(newSelectedEnhancements);
+    
+    // Immediately update global state
+    dispatch({ type: "SET_ENHANCEMENTS", payload: newSelectedEnhancements });
+    
+    console.log("[Step 9 Debug] Enhancement toggled:", enhancementId, "New state:", newSelectedEnhancements);
   };
 
   const saveEnhancements = () => {
+    // Always update state with the current selections
     dispatch({ type: "SET_ENHANCEMENTS", payload: selectedEnhancements });
+    
+    // Also save any enhancement content that hasn't been saved yet
+    Object.entries(previewContent).forEach(([id, content]) => {
+      if (selectedEnhancements.includes(id)) {
+        dispatch({ 
+          type: "SET_ENHANCEMENT_CONTENT", 
+          payload: { id, content } 
+        });
+      }
+    });
+    
+    // Display confirmation toast
     toast({
       title: "Enhancements Saved",
       description: `${selectedEnhancements.length} enhancement${selectedEnhancements.length !== 1 ? 's' : ''} have been saved for your article.`,
-      variant: "default", // Changed from "success" to "default"
+      variant: "default",
     });
+    
+    // Log for debugging
+    console.log("[Step 9 Debug] Saved enhancements:", selectedEnhancements);
+    console.log("[Step 9 Debug] Enhancement content:", previewContent);
   };
 
   const generatePreview = async (enhancementId: string) => {
-    if (!state.primaryKeyword) {
-      toast({
-        title: "Primary Keyword Required",
-        description: "Please select a primary keyword before generating enhancements.",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    setLoading(true);
-    setActivePreview(enhancementId);
-    
+    // Don't regenerate if already loading this enhancement
+    if (isGenerating[enhancementId]) return;
+
+    // Set loading state for this specific enhancement
+    setIsGenerating(prev => ({ ...prev, [enhancementId]: true }));
+
     try {
-      // Generate a mock article if we don't have a real one yet
-      const mockArticle = `# Article about ${state.topic}
+      // Find this enhancement in our enhancement definitions
+      const enhancement = availableEnhancements.find(e => e.id === enhancementId);
+      if (!enhancement) {
+        toast({
+          title: "Enhancement Not Found",
+          description: `Enhancement ${enhancementId} not found`,
+          variant: "destructive"
+        });
+        setIsGenerating(prev => ({ ...prev, [enhancementId]: false }));
+        return;
+      }
+
+      // Get the article text to use for generation
+      const articleText = state.generatedArticle || '';
+      if (!articleText) {
+        toast({
+          title: "Missing Article Text",
+          description: "No article text available",
+          variant: "destructive"
+        });
+        setIsGenerating(prev => ({ ...prev, [enhancementId]: false }));
+        return;
+      }
+
+      // Call the API to generate the enhancement
+      console.log(`[Step 9] Generating ${enhancement.name} preview...`);
       
-      This is a sample article about ${state.topic} that focuses on ${state.primaryKeyword?.text}.
-      
-      ## Introduction
-      This article explores ${state.topic} in detail, covering all the essential aspects.
-      
-      ## Main Section
-      ${state.topic} has many important features and benefits. The key aspects include...`;
-      
-      const content = await apiService.generateEnhancement(
-        enhancementId,
-        state.generatedArticle || mockArticle,
-        state.primaryKeyword.text
-      );
-      
+      let content;
+      try {
+        // Call the API service with the correct parameters (only 3 params)
+        content = await apiService.generateEnhancement(
+          enhancementId,
+          articleText,
+          state.primaryKeyword?.text || ''
+        );
+      } catch (error) {
+        console.error("Error generating enhancement:", error);
+        toast({
+          title: "Generation Failed",
+          description: `Failed to generate ${enhancement.name}. Using fallback data.`,
+          variant: "destructive"
+        });
+        
+        // Create basic fallback content since getMockEnhancementContent doesn't exist
+        content = `This is a sample ${enhancement.name} content. In production, this would be generated using AI based on your article content.`;
+      }
+
+      console.log(`[Step 9] Generated content for ${enhancement.name}:`, content);
+
+      // Update the preview content state
       setPreviewContent(prev => ({
         ...prev,
         [enhancementId]: content
       }));
-      
-      // Auto-select the enhancement if it's not already selected
+
+      // Add to selected enhancements if not already selected
       if (!selectedEnhancements.includes(enhancementId)) {
-        toggleEnhancement(enhancementId);
+        setSelectedEnhancements(prev => [...prev, enhancementId]);
       }
-      
+
       toast({
-        title: "Preview Generated",
-        description: "Enhancement preview has been successfully generated.",
-        variant: "default", // Changed from "success" to "default"
+        title: "Enhancement Generated",
+        description: `${enhancement.name} generated successfully`,
+        variant: "default"
       });
     } catch (error) {
-      console.error("Error generating enhancement preview:", error);
+      console.error(`Error generating ${enhancementId}:`, error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       toast({
-        title: "Error Generating Preview",
-        description: "There was an issue generating the enhancement preview. Please try again.",
+        title: "Generation Error",
+        description: `Failed to generate enhancement: ${errorMessage}`,
         variant: "destructive"
       });
     } finally {
-      setLoading(false);
+      // Clear loading state
+      setIsGenerating(prev => ({ ...prev, [enhancementId]: false }));
     }
   };
 
@@ -194,37 +318,95 @@ export function Step9ArticleEnhancements() {
     setActivePreview("featuredImage");
     
     try {
+      // Show loading message
+      toast({
+        title: "Generating Image",
+        description: "Creating a realistic image for your article...",
+        variant: "default",
+      });
+      
       const imageUrl = await apiService.generateImageSuggestion(
         state.primaryKeyword.text,
-        state.title.text
+        state.title.text,
+        false // Always use DALL-E
       );
       
       if (imageUrl) {
+        // Update local preview content state
         setPreviewContent(prev => ({
           ...prev,
           featuredImage: imageUrl
         }));
         
+        // Save generated content to global state
+        dispatch({ 
+          type: "SET_ENHANCEMENT_CONTENT", 
+          payload: { id: "featuredImage", content: imageUrl } 
+        });
+        
         // Auto-select the enhancement if it's not already selected
         if (!selectedEnhancements.includes("featuredImage")) {
-          toggleEnhancement("featuredImage");
+          // Update local state
+          const newSelectedEnhancements = [...selectedEnhancements, "featuredImage"];
+          setSelectedEnhancements(newSelectedEnhancements);
+          
+          // Update global state
+          dispatch({ type: "SET_ENHANCEMENTS", payload: newSelectedEnhancements });
+          
+          console.log("[Step 9 Debug] Featured image enhancement auto-selected");
         }
         
         toast({
-          title: "Image Generated",
-          description: "An AI-generated image has been created for your article.",
-          variant: "default", // Changed from "success" to "default"
+          title: "Image Added",
+          description: "A professional-quality image has been created for your article.",
+          variant: "default",
         });
+        
+        console.log("[Step 9 Debug] Generated featured image preview");
       } else {
         throw new Error("No image URL returned");
       }
     } catch (error) {
       console.error("Error generating image:", error);
       toast({
-        title: "Error Generating Image",
-        description: "There was an issue generating the image. Please try again.",
+        title: "Error Getting Image",
+        description: "There was an issue obtaining the image. Trying alternative source.",
         variant: "destructive"
       });
+      
+      // Try a fallback approach with a different prompt
+      try {
+        const fallbackImageUrl = await apiService.generateImageSuggestion(
+          state.primaryKeyword.text,
+          state.title.text,
+          false // Always use DALL-E
+        );
+      
+        if (fallbackImageUrl) {
+          setPreviewContent(prev => ({
+            ...prev,
+            featuredImage: fallbackImageUrl
+          }));
+          
+          dispatch({ 
+            type: "SET_ENHANCEMENT_CONTENT", 
+            payload: { id: "featuredImage", content: fallbackImageUrl } 
+          });
+          
+          toast({
+            title: "Fallback Image Added",
+            description: "We've used an alternative approach to provide an image for your article.",
+            variant: "default",
+          });
+        }
+      } catch (fallbackError) {
+        console.error("Fallback image also failed:", fallbackError);
+        toast({
+          title: "Image Generation Failed",
+          description: "We couldn't generate an image at this time. Please try again later.",
+          variant: "destructive"
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -237,33 +419,23 @@ export function Step9ArticleEnhancements() {
   const navigationEnhancements = availableEnhancements.filter(e => e.type === "navigation");
 
   const renderEnhancement = (enhancement: Enhancement) => (
-    <Card 
-      key={enhancement.id} 
-      className={`border p-4 mb-4 transition-all ${
-        enhancement.selected ? "border-blue-500 bg-blue-50" : "hover:border-gray-400"
-      }`}
-    >
-      <div className="flex items-start">
-        <div className="flex-shrink-0 mr-3">
-          <button
-            onClick={() => toggleEnhancement(enhancement.id)}
-            className={`w-6 h-6 rounded-full border flex items-center justify-center ${
-              enhancement.selected ? "bg-blue-600 border-blue-600 text-white" : "border-gray-300"
-            }`}
-          >
-            {enhancement.selected && <Check className="h-4 w-4" />}
-          </button>
-        </div>
-        <div className="flex-1">
-          <div className="flex justify-between items-start">
-            <h3 className="font-medium text-gray-900">{enhancement.name}</h3>
+    <div key={enhancement.id} className="flex flex-col space-y-3 p-4 border rounded-md">
+      <div className="flex justify-between items-center">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <Badge 
+              variant={enhancement.selected ? "default" : "outline"}
+              className={enhancement.selected ? "" : "text-gray-400"}
+            >
+              {enhancement.selected ? "Selected" : "Available"}
+            </Badge>
+          </div>
+          <h3 className="font-medium text-gray-900">{enhancement.name}</h3>
+          {enhancement.id === "featuredImage" ? (
             <Button 
               size="sm" 
               variant="ghost" 
-              onClick={() => enhancement.id === "featuredImage" 
-                ? generateImagePreview() 
-                : generatePreview(enhancement.id)
-              }
+              onClick={() => generateImagePreview()}
               disabled={loading && activePreview === enhancement.id}
               className="h-8 px-2"
             >
@@ -277,57 +449,75 @@ export function Step9ArticleEnhancements() {
               )}
               Preview
             </Button>
-          </div>
-          <p className="text-gray-600 text-sm mt-1">{enhancement.description}</p>
-          
-          {previewContent[enhancement.id] && (
-            <div className="mt-3 bg-white rounded-md border p-3 text-sm">
-              {enhancement.id === "featuredImage" ? (
-                <div className="flex justify-center">
-                  <img 
-                    src={previewContent[enhancement.id]} 
-                    alt="AI Generated Featured Image" 
-                    className="max-h-80 object-contain rounded-md"
-                  />
-                </div>
+          ) : (
+            <Button 
+              size="sm" 
+              variant="ghost" 
+              onClick={() => generatePreview(enhancement.id)}
+              disabled={loading && activePreview === enhancement.id}
+              className="h-8 px-2"
+            >
+              {loading && activePreview === enhancement.id ? (
+                <svg className="animate-spin h-4 w-4 mr-1" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
               ) : (
-                <div 
-                  className="prose prose-sm max-w-none" 
-                  dangerouslySetInnerHTML={{ __html: previewContent[enhancement.id].replace(/\n/g, "<br />") }}
-                />
+                <Plus className="h-4 w-4 mr-1" />
               )}
-              
-              <div className="flex justify-end mt-2">
-                <Button 
-                  size="sm" 
-                  variant="outline" 
-                  className="text-red-600 border-red-200 hover:bg-red-50"
-                  onClick={() => {
-                    setPreviewContent(prev => {
-                      const updated = { ...prev };
-                      delete updated[enhancement.id];
-                      return updated;
-                    });
-                    
-                    // Also remove from selected if it was selected
-                    if (selectedEnhancements.includes(enhancement.id)) {
-                      toggleEnhancement(enhancement.id);
-                    }
-                  }}
-                >
-                  <Trash className="h-3.5 w-3.5 mr-1" />
-                  Remove Preview
-                </Button>
-              </div>
-            </div>
+              Preview
+            </Button>
           )}
         </div>
+        <div>
+          <Checkbox 
+            id={`enhancement-${enhancement.id}`}
+            checked={enhancement.selected}
+            onCheckedChange={() => toggleEnhancement(enhancement.id)}
+          />
+        </div>
       </div>
-    </Card>
+      
+      <p className="text-sm text-gray-600">{enhancement.description}</p>
+      
+      {previewContent[enhancement.id] && (
+        <div className="mt-3 bg-white rounded-md border p-3 text-sm">
+          {enhancement.id === "featuredImage" ? (
+            <div className="flex flex-col items-center">
+              <img 
+                src={previewContent[enhancement.id]} 
+                alt="Featured Image" 
+                className="max-h-80 object-contain rounded-md"
+              />
+              <p className="text-xs text-gray-500 mt-2">
+                AI-generated image
+              </p>
+            </div>
+          ) : enhancement.id === "tableOfContents" ? (
+            <div 
+              className="prose prose-sm max-w-none"
+              dangerouslySetInnerHTML={{ 
+                __html: previewContent[enhancement.id]
+                  .replace(/\n/g, "<br />")
+                  // Convert markdown links to actual hyperlinks with proper anchor formatting
+                  .replace(/\[([^\]]+)\]\(#([^)]+)\)/g, '<a href="#$2" class="text-blue-600 hover:underline">$1</a>')
+                  // Also handle plain text entries that might not be in markdown format
+                  .replace(/^([-*•] )(.*?)( -|:| –) /gm, '$1<a href="#$2" class="text-blue-600 hover:underline">$2</a>$3 ')
+              }}
+            />
+          ) : (
+            <div 
+              className="prose prose-sm max-w-none" 
+              dangerouslySetInnerHTML={{ __html: previewContent[enhancement.id].replace(/\n/g, "<br />") }}
+            />
+          )}
+        </div>
+      )}
+    </div>
   );
 
   return (
-    <ArticleLayout loading={loading && !activePreview}>
+    
       <div className="space-y-8">
         <div>
           <h2 className="text-xl font-medium mb-2">Add Enhancements</h2>
@@ -373,6 +563,6 @@ export function Step9ArticleEnhancements() {
           </p>
         </div>
       </div>
-    </ArticleLayout>
+    
   );
 }

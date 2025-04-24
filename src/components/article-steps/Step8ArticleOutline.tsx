@@ -1,7 +1,7 @@
 
 import * as React from "react";
 import { useArticle } from "@/context/ArticleContext";
-import { ArticleLayout } from "@/components/layout/ArticleLayout";
+
 import { apiService } from "@/services/apiService";
 import { OutlineHeading } from "@/lib/types";
 import { Button } from "@/components/ui/button";
@@ -242,7 +242,7 @@ export function Step8ArticleOutline() {
   };
 
   return (
-    <ArticleLayout loading={loading} nextDisabled={outline.length === 0}>
+    
       <div className="space-y-8">
         <div>
           <h2 className="text-xl font-medium mb-2">Customize Article Outline</h2>
@@ -508,6 +508,6 @@ export function Step8ArticleOutline() {
           </div>
         )}
       </div>
-    </ArticleLayout>
+    
   );
 }

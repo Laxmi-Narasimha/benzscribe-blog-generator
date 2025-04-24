@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  # Main web application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"
+    depends_on:
+      - mock-proxy
+    environment:
+      - NODE_ENV=production
+    networks:
+      - app-network
+
+  # Mock proxy service for SerpAPI
+  mock-proxy:
+    image: node:18-alpine
+    working_dir: /app
+    volumes:
+      - ./src/services:/app
+    command: node /app/simple-proxy.cjs
+    ports:
+      - "3333:3333"
+    networks:
+      - app-network
+
+# Shared network for inter-service communication
+networks:
+  app-network:
+    driver: bridge 

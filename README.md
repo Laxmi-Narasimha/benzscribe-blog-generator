@@ -1,73 +1,137 @@
-# Welcome to your Lovable project
+# Benz Scribe Creative Craft
 
-## Project info
+A modern article writing assistant with AI-powered content tools.
 
-**URL**: https://lovable.dev/projects/1c4c6f08-26fa-4c9e-b553-dd053715ef0e
+## Features
 
-## How can I edit this code?
+- Topic research and content planning
+- Reference management from web sources and local files
+- Keyword optimization for SEO
+- Article title generation
+- Content outline creation
+- Article generation with customizable styles and parameters
 
-There are several ways of editing your application.
+## Getting Started
 
-**Use Lovable**
+### Prerequisites
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/1c4c6f08-26fa-4c9e-b553-dd053715ef0e) and start prompting.
+- Node.js (v16 or newer)
+- npm or yarn
 
-Changes made via Lovable will be committed automatically to this repo.
+### Installation
 
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+1. Clone the repository
+```bash
+git clone https://github.com/yourusername/benz-scribe-creative-craft.git
+cd benz-scribe-creative-craft
 ```
 
-**Edit a file directly in GitHub**
+2. Install dependencies
+```bash
+npm install
+# or
+yarn install
+```
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## Running the Application
 
-**Use GitHub Codespaces**
+There are two components to run:
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+### 1. Start the Proxy Server
 
-## What technologies are used for this project?
+The proxy server is needed to bypass CORS restrictions when fetching data from external APIs:
 
-This project is built with:
+```bash
+# Start the proxy server 
+node src/services/proxy.cjs
+```
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+You should see output confirming the proxy is running:
+```
+Proxy server running on port 3001
+Access the proxy at: http://localhost:3001/proxy?url=YOUR_URL_HERE
+```
 
-## How can I deploy this project?
+### 2. Start the Development Server
 
-Simply open [Lovable](https://lovable.dev/projects/1c4c6f08-26fa-4c9e-b553-dd053715ef0e) and click on Share -> Publish.
+In a separate terminal, run:
 
-## Can I connect a custom domain to my Lovable project?
+```bash
+npm run dev
+# or
+yarn dev
+```
 
-Yes, you can!
+Open [http://localhost:3000](http://localhost:3000) (or the URL shown in your terminal) in your browser.
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+## Deployment Options
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+This application can be deployed in several ways:
+
+### Quick Deployment
+
+For quick deployment, use one of the following options:
+
+#### Windows Users
+Run the deployment script and follow the prompts:
+```
+deploy.bat
+```
+
+#### macOS/Linux Users
+Run the deployment script and follow the prompts:
+```
+./deploy.sh
+```
+
+### Cloud Deployment
+
+The easiest way to deploy the application is using Vercel:
+```
+npm install -g vercel
+vercel login
+vercel
+```
+
+### Docker Deployment
+
+To deploy using Docker:
+```
+docker build -t benz-scribe-app .
+docker run -p 8080:80 benz-scribe-app
+```
+
+### Running Both Application and Proxy Server
+
+With Docker Compose:
+```
+docker-compose up --build
+```
+
+For detailed deployment instructions, see:
+- [QUICK_START.md](QUICK_START.md) - For getting started quickly
+- [DEPLOYMENT.md](DEPLOYMENT.md) - For comprehensive deployment options
+- [WINDOWS_DEPLOYMENT.md](WINDOWS_DEPLOYMENT.md) - For Windows-specific instructions
+
+## Troubleshooting
+
+### Proxy Server Issues
+
+If you see "Proxy server is not running" in the application:
+
+1. Make sure you've started the proxy server with `node src/services/proxy.cjs`
+2. Check that port 3001 is available (not used by another application)
+3. If there are any issues, check the terminal where the proxy server is running for error messages
+
+### API Integration Issues
+
+If you're experiencing issues with references not loading in Step 3:
+
+1. Check the browser console for any API errors
+2. Verify your SerpAPI key is valid and has sufficient quota
+3. Make sure the proxy server is running correctly
+4. The application will automatically fall back to mock data if the API fails
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.

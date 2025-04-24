@@ -1,7 +1,7 @@
 
 import * as React from "react";
 import { useArticle } from "@/context/ArticleContext";
-import { ArticleLayout } from "@/components/layout/ArticleLayout";
+
 import { ARTICLE_LENGTHS, WRITING_STYLES, WRITING_POINTS_OF_VIEW } from "@/lib/constants";
 import { Badge } from "@/components/ui/badge";
 import { Check } from "lucide-react";
@@ -31,7 +31,7 @@ export function Step7Configuration() {
   };
 
   return (
-    <ArticleLayout>
+    
       <div className="space-y-10">
         <div>
           <h2 className="text-xl font-medium mb-4">Tailor Your Article</h2>
@@ -192,6 +192,6 @@ export function Step7Configuration() {
           </div>
         </div>
       </div>
-    </ArticleLayout>
+    
   );
 }
