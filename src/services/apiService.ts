@@ -3,9 +3,9 @@ import { Reference, Keyword, ArticleTitle, OutlineHeading } from '@/lib/types';
 import { serpApiService } from './serpApiService';
 import { openaiService } from './openaiService';
 import { AxiosError } from 'axios';
+import { getOpenAIKey } from './apiKeyService';
 
-// API keys - using the ones provided
-const OPENAI_API_KEY = "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";
+// API keys - using the ones provided from service
 const SERP_API_KEY = "68112bfd05d0c4991f37cb9953f25811d5d345aa142beac859f22e031865fdb7";
 
 /**
@@ -13,11 +13,24 @@ const SERP_API_KEY = "68112bfd05d0c4991f37cb9953f25811d5d345aa142beac859f22e0318
  * If key is invalid, we'll use fallbacks instead of making failing API calls
  */
 const isOpenAIAvailable = (): boolean => {
-  // This is a simple check - we know the key format has changed or is invalid
-  if (!OPENAI_API_KEY || OPENAI_API_KEY.startsWith('sk-proj-')) {
-    console.warn('[API Service] OpenAI API key appears to be invalid or in an incorrect format');
+  const key = getOpenAIKey(); // Use the function to get the possibly updated key
+  // Accept both standard (sk-) keys and project-based (sk-proj-) keys
+  if (!key) {
+    console.warn('[API Service] OpenAI API key is missing');
     return false;
   }
+  
+  // As long as they start with one of the valid prefixes, consider the key valid
+  if (!key.startsWith('sk-')) {
+    console.warn('[API Service] OpenAI API key has invalid format (must start with sk-)');
+    return false;
+  }
+  
+  // Explicitly log when we're using a project-based key (sk-proj-...)
+  if (key.startsWith('sk-proj-')) {
+    console.log('[API Service] Using project-based OpenAI API key (sk-proj-...)');
+  }
+  
   return true;
 };
 
@@ -233,7 +246,7 @@ export const apiService = {
         {
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${OPENAI_API_KEY}`
+            'Authorization': `Bearer ${getOpenAIKey()}`
           }
         }
       );
@@ -471,7 +484,7 @@ Key Requirements:
         {
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${OPENAI_API_KEY}`
+            'Authorization': `Bearer ${getOpenAIKey()}`
           }
         }
       );
@@ -510,7 +523,7 @@ Key Requirements:
         {
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${OPENAI_API_KEY}`
+            'Authorization': `Bearer ${getOpenAIKey()}`
           }
         }
       );
@@ -718,7 +731,7 @@ The article content is:\n\n${article.substring(0, 4000)}...`;
         {
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${OPENAI_API_KEY}`
+            'Authorization': `Bearer ${getOpenAIKey()}`
           }
         }
       );
@@ -751,7 +764,7 @@ The article content is:\n\n${article.substring(0, 4000)}...`;
             {
               headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${OPENAI_API_KEY}`
+                'Authorization': `Bearer ${getOpenAIKey()}`
               }
             }
           );
@@ -817,7 +830,7 @@ Follow these specific guidelines:
         {
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${OPENAI_API_KEY}`
+            'Authorization': `Bearer ${getOpenAIKey()}`
           },
           timeout: 30000 // 30 second timeout
         }
@@ -843,7 +856,7 @@ Follow these specific guidelines:
         {
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${OPENAI_API_KEY}`
+            'Authorization': `Bearer ${getOpenAIKey()}`
           },
           timeout: 60000 // 60 second timeout for image generation
         }
@@ -879,7 +892,7 @@ Follow these specific guidelines:
           {
             headers: {
               'Content-Type': 'application/json',
-              'Authorization': `Bearer ${OPENAI_API_KEY}`
+              'Authorization': `Bearer ${getOpenAIKey()}`
             },
             timeout: 60000
           }

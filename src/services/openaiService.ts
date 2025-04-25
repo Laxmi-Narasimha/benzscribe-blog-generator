@@ -1,10 +1,29 @@
 import OpenAI from 'openai';
 
-// Initialize OpenAI client
-const openai = new OpenAI({
-  apiKey: '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',
-  dangerouslyAllowBrowser: true // Allow running in browser
-});
+// Import the API key function from apiKeyService to ensure we use the same key
+import { getOpenAIKey } from './apiKeyService';
+
+// Initialize OpenAI client with proper error handling
+let openai: OpenAI;
+try {
+  openai = new OpenAI({
+    apiKey: getOpenAIKey(), // Use the function to get the key
+    dangerouslyAllowBrowser: true // Allow running in browser
+  });
+} catch (error) {
+  console.error('Error initializing OpenAI client:', error);
+  // Create a mock client that returns fallbacks for all methods
+  openai = {
+    chat: {
+      completions: {
+        create: async () => {
+          console.warn('Using mock OpenAI client due to initialization error');
+          return { choices: [{ message: { content: '' } }] };
+        }
+      }
+    }
+  } as unknown as OpenAI;
+}
 
 export interface TitleSuggestion {
   id: string;
