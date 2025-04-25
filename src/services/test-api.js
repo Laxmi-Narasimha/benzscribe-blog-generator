@@ -6,7 +6,7 @@
 import axios from 'axios';
 
 // API key - never expose this in a client-side application in production
-const SERPAPI_KEY = "ab325143079f0c503ec178b08970495d178f2cb7c556dd7b014f459c5b2bad8f";
+const SERPAPI_KEY = "68112bfd05d0c4991f37cb9953f25811d5d345aa142beac859f22e031865fdb7";
 const BASE_URL = "https://serpapi.com/search";
 
 async function testSerpApi() {
