@@ -2,10 +2,10 @@ import * as React from "react";
 import { useArticle } from "@/context/ArticleContext";
 import { SAMPLE_PACKAGING_TOPICS, COUNTRIES, LANGUAGES } from "@/lib/constants";
 import { openaiService } from "@/services/openaiService";
-import { Loader2 } from "lucide-react";
+import { Loader2, MapPin, Globe, Sparkles, RefreshCw } from "lucide-react";
 
 export function Step1Topic() {
-  const { state, dispatch, nextStep } = useArticle();
+  const { state, dispatch } = useArticle();
   const [showSuggestions, setShowSuggestions] = React.useState(false);
   const [aiTitleSuggestions, setAiTitleSuggestions] = React.useState<string[]>([]);
   const [loadingSuggestions, setLoadingSuggestions] = React.useState(false);
@@ -13,7 +13,6 @@ export function Step1Topic() {
 
   const handleTopicChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     dispatch({ type: "SET_TOPIC", payload: e.target.value });
-    // Reset error when topic changes
     setError(null);
   };
 
@@ -30,109 +29,77 @@ export function Step1Topic() {
     dispatch({ type: "SET_LANGUAGE", payload: e.target.value });
   };
 
-  // Force regenerate suggestions button handler
   const handleRegenerateSuggestions = async () => {
     if (!state.topic || state.topic.trim().length < 3) {
       setError("Please enter a topic with at least 3 characters");
       return;
     }
-    
     setLoadingSuggestions(true);
     setError(null);
-    
     try {
-      console.log('Manually triggering suggestion generation for topic:', state.topic);
       const suggestions = await openaiService.generateTitleSuggestions(state.topic);
-      console.log('Received suggestions:', suggestions);
-      
       if (suggestions.length > 0) {
         setAiTitleSuggestions(suggestions.map(s => s.text));
       } else {
         setError("Could not generate suggestions. Please try a different topic.");
       }
-    } catch (err) {
-      console.error('Error during manual regeneration:', err);
+    } catch {
       setError("An error occurred while generating suggestions. Please try again.");
     } finally {
       setLoadingSuggestions(false);
     }
   };
 
-  // Generate AI title suggestions when the topic changes
   React.useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
-    
+    let timeoutId: ReturnType<typeof setTimeout>;
     const generateSuggestions = async () => {
       if (!state.topic || state.topic.trim().length < 3) {
         setAiTitleSuggestions([]);
         return;
       }
-      
       setLoadingSuggestions(true);
       setError(null);
-      
       try {
-        console.log('Auto-generating suggestions for topic:', state.topic);
         const suggestions = await openaiService.generateTitleSuggestions(state.topic);
-        console.log('Received suggestions:', suggestions);
-        
         if (suggestions.length > 0) {
           setAiTitleSuggestions(suggestions.map(s => s.text));
-        } else {
-          setError("Could not generate suggestions. Please try a different topic.");
         }
-      } catch (error) {
-        console.error('Error generating title suggestions:', error);
-        setError("An error occurred while generating suggestions. Please try again.");
-        
-        // Still set fallback suggestions based on the topic
+      } catch {
         setAiTitleSuggestions([
           `Understanding the Different Types of ${state.topic} and Their Applications`,
           `How to Choose the Right ${state.topic} for Your Needs`,
           `The Environmental Impact of ${state.topic}: Myths and Facts`,
-          `Innovations in Corrosion Prevention: Future Trends in ${state.topic} Solutions`
+          `Innovations in ${state.topic}: Future Trends`
         ]);
       } finally {
         setLoadingSuggestions(false);
       }
     };
-    
-    // Debounce the API call to prevent too many requests while typing
     if (state.topic && state.topic.trim().length >= 3) {
-      console.log('Setting timeout for topic:', state.topic);
-      timeoutId = setTimeout(generateSuggestions, 1200); // Increased debounce time to 1.2s
+      timeoutId = setTimeout(generateSuggestions, 1200);
     }
-    
-    return () => {
-      if (timeoutId) {
-        console.log('Clearing timeout');
-        clearTimeout(timeoutId);
-      }
-    };
+    return () => { if (timeoutId) clearTimeout(timeoutId); };
   }, [state.topic]);
 
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="text-xl font-medium mb-4">Start Your Article: Choose Your Topic</h2>
-        <p className="text-gray-600 mb-6">
-          Define the key elements to tailor your content for targeted impact.
+        <p className="text-base font-body text-muted-foreground leading-relaxed max-w-2xl">
+          Define the foundation of your article. Choose a compelling topic and tailor it for your target audience.
         </p>
       </div>
 
       <div className="space-y-6">
-        <div>
-          <label 
-            htmlFor="topic" 
-            className="block text-sm font-medium text-gray-700 mb-2"
-          >
+        {/* Topic Input */}
+        <div className="artisan-card p-6">
+          <label htmlFor="topic" className="block text-sm font-body font-semibold text-foreground mb-3 tracking-wide uppercase">
             Topic
           </label>
           <div className="relative">
             <input
               id="topic"
-              type="text" 
-              className="w-full px-4 py-3 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              type="text"
+              className="artisan-input text-base"
               placeholder="Enter your topic (e.g., VCI bags, sustainable packaging)"
               value={state.topic}
               onChange={handleTopicChange}
@@ -140,37 +107,34 @@ export function Step1Topic() {
               onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
             />
             {showSuggestions && (
-              <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
-                <div className="p-3">
-                  <div className="text-sm font-medium text-gray-500 mb-2">Suggested Topics</div>
-                  <div className="space-y-1">
-                    {SAMPLE_PACKAGING_TOPICS.map((topic, index) => (
-                      <div
-                        key={index}
-                        className="cursor-pointer hover:bg-blue-50 p-2 rounded-md text-sm"
-                        onClick={() => handleSuggestionClick(topic)}
-                      >
-                        {topic}
-                      </div>
-                    ))}
-                  </div>
-                </div>
+              <div className="absolute z-20 w-full mt-2 artisan-card p-2 max-h-60 overflow-auto animate-scale-in">
+                <p className="text-[10px] font-body tracking-[0.15em] uppercase text-muted-foreground px-3 py-2">
+                  Suggested Topics
+                </p>
+                {SAMPLE_PACKAGING_TOPICS.map((topic, index) => (
+                  <button
+                    key={index}
+                    className="w-full text-left px-3 py-2.5 rounded-lg text-sm font-body text-foreground hover:bg-primary/5 hover:text-primary transition-premium"
+                    onClick={() => handleSuggestionClick(topic)}
+                  >
+                    {topic}
+                  </button>
+                ))}
               </div>
             )}
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label 
-              htmlFor="targetCountry" 
-              className="block text-sm font-medium text-gray-700 mb-2"
-            >
-              Target Audience Location
+        {/* Country & Language */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div className="artisan-card p-6">
+            <label htmlFor="targetCountry" className="flex items-center gap-2 text-sm font-body font-semibold text-foreground mb-3 tracking-wide uppercase">
+              <MapPin className="h-3.5 w-3.5 text-primary" />
+              Target Location
             </label>
             <select
               id="targetCountry"
-              className="w-full px-4 py-3 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="artisan-select"
               value={state.targetCountry}
               onChange={handleCountryChange}
             >
@@ -182,16 +146,14 @@ export function Step1Topic() {
             </select>
           </div>
 
-          <div>
-            <label 
-              htmlFor="language" 
-              className="block text-sm font-medium text-gray-700 mb-2"
-            >
+          <div className="artisan-card p-6">
+            <label htmlFor="language" className="flex items-center gap-2 text-sm font-body font-semibold text-foreground mb-3 tracking-wide uppercase">
+              <Globe className="h-3.5 w-3.5 text-primary" />
               Article Language
             </label>
             <select
               id="language"
-              className="w-full px-4 py-3 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="artisan-select"
               value={state.language}
               onChange={handleLanguageChange}
             >
@@ -205,45 +167,53 @@ export function Step1Topic() {
         </div>
       </div>
 
+      {/* AI Suggestions */}
       {state.topic && (
-        <div className="bg-blue-50 border border-blue-200 rounded-md p-4 mt-4">
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="font-medium text-blue-800">AI-Generated Topic Suggestions</h3>
+        <div className="artisan-card overflow-hidden animate-fade-up">
+          <div className="px-6 py-4 border-b border-border flex items-center justify-between">
             <div className="flex items-center gap-2">
-              {loadingSuggestions && <Loader2 className="h-4 w-4 text-blue-600 animate-spin" />}
-              <button 
+              <Sparkles className="h-4 w-4 text-primary" />
+              <h3 className="font-display text-lg font-semibold text-foreground">AI Suggestions</h3>
+            </div>
+            <div className="flex items-center gap-2">
+              {loadingSuggestions && <Loader2 className="h-4 w-4 text-primary animate-spin" />}
+              <button
                 onClick={handleRegenerateSuggestions}
                 disabled={loadingSuggestions}
-                className="text-xs px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+                className="artisan-btn-ghost text-xs"
               >
+                <RefreshCw className="h-3.5 w-3.5" />
                 Regenerate
               </button>
             </div>
           </div>
-          
+
           {error && (
-            <div className="mb-3 bg-red-50 border border-red-200 rounded p-2 text-red-600 text-sm">
+            <div className="mx-6 mt-4 p-3 rounded-lg bg-destructive/5 border border-destructive/20 text-destructive text-sm font-body">
               {error}
             </div>
           )}
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+
+          <div className="p-4">
             {loadingSuggestions ? (
-              <div className="col-span-2 text-center py-4 text-gray-500">
-                Generating smart suggestions based on your topic...
+              <div className="text-center py-8 text-muted-foreground text-sm font-body">
+                <Loader2 className="h-5 w-5 animate-spin mx-auto mb-2 text-primary" />
+                Generating smart suggestions...
               </div>
             ) : aiTitleSuggestions.length > 0 ? (
-              aiTitleSuggestions.map((suggestion, index) => (
-                <button 
-                  key={index}
-                  className="text-left text-blue-600 hover:text-blue-800 hover:underline p-2 rounded-md"
-                  onClick={() => handleSuggestionClick(suggestion)}
-                >
-                  {suggestion}
-                </button>
-              ))
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                {aiTitleSuggestions.map((suggestion, index) => (
+                  <button
+                    key={index}
+                    className="text-left p-3.5 rounded-xl text-sm font-body text-foreground/80 hover:bg-primary/5 hover:text-primary transition-premium border border-transparent hover:border-primary/10"
+                    onClick={() => handleSuggestionClick(suggestion)}
+                  >
+                    {suggestion}
+                  </button>
+                ))}
+              </div>
             ) : (
-              <div className="col-span-2 text-center py-4 text-gray-500">
+              <div className="text-center py-8 text-muted-foreground text-sm font-body">
                 Enter a specific topic to see AI-generated suggestions
               </div>
             )}

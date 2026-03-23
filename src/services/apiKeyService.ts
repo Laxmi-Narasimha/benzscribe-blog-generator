@@ -1,5 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // apiKeyService.ts - A service to manage API keys
 // For simplicity, this uses localStorage, but can be enhanced with server-side storage
+declare const window: any;
 
 // Default keys to use if no custom keys are found
 const DEFAULT_SERP_API_KEY = "68112bfd05d0c4991f37cb9953f25811d5d345aa142beac859f22e031865fdb7";

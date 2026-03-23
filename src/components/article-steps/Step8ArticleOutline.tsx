@@ -1,12 +1,9 @@
-
 import * as React from "react";
 import { useArticle } from "@/context/ArticleContext";
-
 import { apiService } from "@/services/apiService";
 import { OutlineHeading } from "@/lib/types";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Check, ChevronDown, ChevronUp, Edit, Loader2, Plus, Trash } from "lucide-react";
+import { Check, ChevronDown, ChevronUp, Edit, Loader2, Plus, Trash, RefreshCw, Save, GripVertical } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
 
@@ -23,491 +20,262 @@ export function Step8ArticleOutline() {
   React.useEffect(() => {
     const generateOutline = async () => {
       if (!state.topic || !state.primaryKeyword) return;
-      
-      // Only generate if we don't have an outline yet
       if (state.outline.length === 0) {
         setLoading(true);
         try {
           const secondaryKeywordTexts = state.secondaryKeywords.map(k => k.text);
-          const data = await apiService.generateOutline(
-            state.topic, 
-            state.primaryKeyword.text,
-            secondaryKeywordTexts,
-            state.articleType
-          );
+          const data = await apiService.generateOutline(state.topic, state.primaryKeyword.text, secondaryKeywordTexts, state.articleType);
           setOutline(data);
           dispatch({ type: "SET_OUTLINE", payload: data });
-
-          // Expand all sections by default
           const newExpanded: Record<number, boolean> = {};
-          data.forEach((_, index) => {
-            newExpanded[index] = true;
-          });
+          data.forEach((_, index) => { newExpanded[index] = true; });
           setExpanded(newExpanded);
-          
-          toast({
-            title: "Outline Generated",
-            description: "Your article outline has been successfully generated.",
-            variant: "default", // Changed from "success" to "default"
-          });
+          toast({ title: "Outline Generated", description: "Your article outline has been successfully generated.", variant: "default" });
         } catch (error) {
           console.error("Error generating outline:", error);
-          toast({
-            title: "Error Generating Outline",
-            description: "There was an issue generating your article outline. Please try again.",
-            variant: "destructive",
-          });
+          toast({ title: "Error", description: "Failed to generate outline. Please try again.", variant: "destructive" });
         } finally {
           setLoading(false);
         }
       } else {
-        // Use existing outline from state
         setOutline(state.outline);
-        
-        // Expand all sections by default
         const newExpanded: Record<number, boolean> = {};
-        state.outline.forEach((_, index) => {
-          newExpanded[index] = true;
-        });
+        state.outline.forEach((_, index) => { newExpanded[index] = true; });
         setExpanded(newExpanded);
       }
     };
-    
     generateOutline();
   }, [state.topic, state.primaryKeyword, state.secondaryKeywords, state.articleType, state.outline, dispatch, toast]);
 
   const handleSaveOutline = () => {
     dispatch({ type: "SET_OUTLINE", payload: outline });
-    toast({
-      title: "Outline Saved",
-      description: "Your article outline has been saved successfully.",
-      variant: "default", // Changed from "success" to "default"
-    });
+    toast({ title: "Outline Saved", description: "Your outline has been saved.", variant: "default" });
   };
 
   const handleRegenerateOutline = async () => {
     if (!state.topic || !state.primaryKeyword) return;
-    
     setLoading(true);
     try {
       const secondaryKeywordTexts = state.secondaryKeywords.map(k => k.text);
-      const data = await apiService.generateOutline(
-        state.topic, 
-        state.primaryKeyword.text,
-        secondaryKeywordTexts,
-        state.articleType
-      );
+      const data = await apiService.generateOutline(state.topic, state.primaryKeyword.text, secondaryKeywordTexts, state.articleType);
       setOutline(data);
       dispatch({ type: "SET_OUTLINE", payload: data });
-      
-      // Expand all sections by default
       const newExpanded: Record<number, boolean> = {};
-      data.forEach((_, index) => {
-        newExpanded[index] = true;
-      });
+      data.forEach((_, index) => { newExpanded[index] = true; });
       setExpanded(newExpanded);
-      
-      toast({
-        title: "Outline Regenerated",
-        description: "Your article outline has been regenerated successfully.",
-        variant: "default", // Changed from "success" to "default"
-      });
+      toast({ title: "Outline Regenerated", description: "New outline created.", variant: "default" });
     } catch (error) {
       console.error("Error regenerating outline:", error);
-      toast({
-        title: "Error Regenerating Outline",
-        description: "There was an issue regenerating your article outline. Please try again.",
-        variant: "destructive",
-      });
+      toast({ title: "Error", description: "Failed to regenerate. Please try again.", variant: "destructive" });
     } finally {
       setLoading(false);
     }
   };
 
-  const toggleExpanded = (index: number) => {
-    setExpanded(prev => ({
-      ...prev,
-      [index]: !prev[index]
-    }));
-  };
-
-  const startEditingHeading = (index: number) => {
-    setEditingIndex(index);
-    setEditingSubIndex(null);
-    setEditingText(outline[index].heading);
-  };
-
-  const startEditingSubheading = (headingIndex: number, subheadingIndex: number) => {
-    setEditingIndex(headingIndex);
-    setEditingSubIndex(subheadingIndex);
-    setEditingText(outline[headingIndex].subheadings[subheadingIndex]);
-  };
+  const toggleExpanded = (index: number) => setExpanded(prev => ({ ...prev, [index]: !prev[index] }));
+  const startEditingHeading = (index: number) => { setEditingIndex(index); setEditingSubIndex(null); setEditingText(outline[index].heading); };
+  const startEditingSubheading = (hi: number, si: number) => { setEditingIndex(hi); setEditingSubIndex(si); setEditingText(outline[hi].subheadings[si]); };
 
   const saveEditing = () => {
     if (editingIndex === null) return;
-    
-    const updatedOutline = [...outline];
+    const updated = [...outline];
     if (editingSubIndex === null) {
-      // Editing a heading
-      updatedOutline[editingIndex] = {
-        ...updatedOutline[editingIndex],
-        heading: editingText
-      };
+      updated[editingIndex] = { ...updated[editingIndex], heading: editingText };
     } else {
-      // Editing a subheading
-      const updatedSubheadings = [...updatedOutline[editingIndex].subheadings];
-      updatedSubheadings[editingSubIndex] = editingText;
-      updatedOutline[editingIndex] = {
-        ...updatedOutline[editingIndex],
-        subheadings: updatedSubheadings
-      };
+      const subs = [...updated[editingIndex].subheadings];
+      subs[editingSubIndex] = editingText;
+      updated[editingIndex] = { ...updated[editingIndex], subheadings: subs };
     }
-    
-    setOutline(updatedOutline);
-    setEditingIndex(null);
-    setEditingSubIndex(null);
-    setEditingText("");
+    setOutline(updated);
+    setEditingIndex(null); setEditingSubIndex(null); setEditingText("");
   };
 
-  const cancelEditing = () => {
-    setEditingIndex(null);
-    setEditingSubIndex(null);
-    setEditingText("");
+  const cancelEditing = () => { setEditingIndex(null); setEditingSubIndex(null); setEditingText(""); };
+  const addHeading = () => setOutline([...outline, { heading: "New Section", subheadings: [] }]);
+  const addSubheading = (hi: number) => {
+    const updated = [...outline];
+    updated[hi] = { ...updated[hi], subheadings: [...updated[hi].subheadings, "New Subsection"] };
+    setOutline(updated);
+  };
+  const deleteHeading = (index: number) => setOutline(outline.filter((_, i) => i !== index));
+  const deleteSubheading = (hi: number, si: number) => {
+    const updated = [...outline];
+    updated[hi] = { ...updated[hi], subheadings: updated[hi].subheadings.filter((_, i) => i !== si) };
+    setOutline(updated);
   };
 
-  const addHeading = () => {
-    setOutline([...outline, { heading: "New Section", subheadings: [] }]);
+  const moveHeading = (index: number, dir: "up" | "down") => {
+    if ((dir === "up" && index === 0) || (dir === "down" && index === outline.length - 1)) return;
+    const updated = [...outline];
+    const target = dir === "up" ? index - 1 : index + 1;
+    [updated[index], updated[target]] = [updated[target], updated[index]];
+    setOutline(updated);
   };
 
-  const addSubheading = (headingIndex: number) => {
-    const updatedOutline = [...outline];
-    updatedOutline[headingIndex] = {
-      ...updatedOutline[headingIndex],
-      subheadings: [...updatedOutline[headingIndex].subheadings, "New Subsection"]
-    };
-    setOutline(updatedOutline);
-  };
-
-  const deleteHeading = (index: number) => {
-    const updatedOutline = outline.filter((_, i) => i !== index);
-    setOutline(updatedOutline);
-  };
-
-  const deleteSubheading = (headingIndex: number, subheadingIndex: number) => {
-    const updatedOutline = [...outline];
-    const updatedSubheadings = updatedOutline[headingIndex].subheadings.filter((_, i) => i !== subheadingIndex);
-    updatedOutline[headingIndex] = {
-      ...updatedOutline[headingIndex],
-      subheadings: updatedSubheadings
-    };
-    setOutline(updatedOutline);
-  };
-
-  const moveHeading = (index: number, direction: "up" | "down") => {
-    if ((direction === "up" && index === 0) || 
-        (direction === "down" && index === outline.length - 1)) {
-      return;
-    }
-    
-    const updatedOutline = [...outline];
-    const targetIndex = direction === "up" ? index - 1 : index + 1;
-    
-    [updatedOutline[index], updatedOutline[targetIndex]] = 
-      [updatedOutline[targetIndex], updatedOutline[index]];
-    
-    setOutline(updatedOutline);
-  };
-
-  const moveSubheading = (headingIndex: number, subheadingIndex: number, direction: "up" | "down") => {
-    const subheadings = outline[headingIndex].subheadings;
-    
-    if ((direction === "up" && subheadingIndex === 0) || 
-        (direction === "down" && subheadingIndex === subheadings.length - 1)) {
-      return;
-    }
-    
-    const updatedOutline = [...outline];
-    const updatedSubheadings = [...subheadings];
-    const targetIndex = direction === "up" ? subheadingIndex - 1 : subheadingIndex + 1;
-    
-    [updatedSubheadings[subheadingIndex], updatedSubheadings[targetIndex]] = 
-      [updatedSubheadings[targetIndex], updatedSubheadings[subheadingIndex]];
-    
-    updatedOutline[headingIndex] = {
-      ...updatedOutline[headingIndex],
-      subheadings: updatedSubheadings
-    };
-    
-    setOutline(updatedOutline);
+  const moveSubheading = (hi: number, si: number, dir: "up" | "down") => {
+    const subs = outline[hi].subheadings;
+    if ((dir === "up" && si === 0) || (dir === "down" && si === subs.length - 1)) return;
+    const updated = [...outline];
+    const newSubs = [...subs];
+    const target = dir === "up" ? si - 1 : si + 1;
+    [newSubs[si], newSubs[target]] = [newSubs[target], newSubs[si]];
+    updated[hi] = { ...updated[hi], subheadings: newSubs };
+    setOutline(updated);
   };
 
   return (
-    
-      <div className="space-y-8">
-        <div>
-          <h2 className="text-xl font-medium mb-2">Customize Article Outline</h2>
-          <p className="text-gray-600 mb-4">
-            Refine the structure of your article by editing, rearranging, or adding sections and subsections.
-          </p>
-          
-          <div className="flex items-center space-x-4 mb-8">
-            <Button onClick={handleSaveOutline} disabled={loading}>
-              <Check className="mr-2 h-4 w-4" />
-              Save Outline
-            </Button>
-            <Button 
-              variant="outline"
-              onClick={handleRegenerateOutline} 
-              disabled={loading}
-            >
-              {loading ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <svg
-                  className="mr-2 h-4 w-4"
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M21 2v6h-6"></path>
-                  <path d="M3 12a9 9 0 0 1 15.14-6.63L21 8"></path>
-                  <path d="M3 22v-6h6"></path>
-                  <path d="M21 12a9 9 0 0 1-15.14 6.63L3 16"></path>
-                </svg>
+    <div className="space-y-8">
+      <p className="text-base font-body text-muted-foreground leading-relaxed max-w-2xl">
+        Sculpt the perfect structure. Edit, rearrange, or add sections to create a compelling narrative flow.
+      </p>
+
+      {/* Actions */}
+      <div className="flex flex-wrap items-center gap-3">
+        <button className="artisan-btn-primary" onClick={handleSaveOutline} disabled={loading}>
+          <Save className="h-4 w-4" /> Save Outline
+        </button>
+        <button className="artisan-btn-secondary" onClick={handleRegenerateOutline} disabled={loading}>
+          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+          Regenerate
+        </button>
+      </div>
+
+      {loading ? (
+        <div className="flex flex-col items-center py-16 artisan-card">
+          <Loader2 className="h-10 w-10 text-primary animate-spin mb-4" />
+          <p className="text-lg font-display font-semibold text-foreground">Crafting your outline...</p>
+          <p className="text-sm font-body text-muted-foreground mt-1">Creating a comprehensive structure based on your inputs</p>
+        </div>
+      ) : outline.length === 0 ? (
+        <div className="text-center py-16 artisan-card border-dashed">
+          <p className="text-lg font-display font-semibold text-foreground mb-2">No outline yet</p>
+          <p className="text-sm font-body text-muted-foreground mb-6">Generate an outline to get started</p>
+          <button className="artisan-btn-primary" onClick={handleRegenerateOutline}>Generate Outline</button>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {outline.map((section, index) => (
+            <div key={index} className="artisan-card overflow-hidden animate-fade-up" style={{ animationDelay: `${index * 0.05}s` }}>
+              {/* Section Header */}
+              <div className="px-5 py-4 bg-muted/30 border-b border-border flex items-center justify-between">
+                {editingIndex === index && editingSubIndex === null ? (
+                  <div className="flex-1 flex items-center gap-2">
+                    <input
+                      type="text"
+                      className="artisan-input flex-1"
+                      value={editingText}
+                      onChange={(e) => setEditingText(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === 'Enter') saveEditing(); }}
+                      autoFocus
+                    />
+                    <button className="artisan-btn-ghost text-xs" onClick={cancelEditing}>Cancel</button>
+                    <button className="artisan-btn-primary text-xs py-2 px-3" onClick={saveEditing}>Save</button>
+                  </div>
+                ) : (
+                  <>
+                    <div className="flex items-center gap-3">
+                      <button onClick={() => toggleExpanded(index)} className="text-muted-foreground hover:text-foreground transition-premium">
+                        {expanded[index] ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                      </button>
+                      <GripVertical className="h-4 w-4 text-muted-foreground/40" />
+                      <h4 className="font-display text-lg font-semibold text-foreground">{section.heading}</h4>
+                      {(index === 0 || index === outline.length - 1) && (
+                        <Badge variant="outline" className="text-[10px] font-body">{index === 0 ? 'Introduction' : 'Conclusion'}</Badge>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-0.5">
+                      <button onClick={() => startEditingHeading(index)} className="p-1.5 rounded-lg hover:bg-primary/10 text-primary transition-premium" title="Edit">
+                        <Edit className="h-3.5 w-3.5" />
+                      </button>
+                      <button onClick={() => moveHeading(index, "up")} disabled={index === 0} className={`p-1.5 rounded-lg transition-premium ${index === 0 ? 'opacity-20' : 'hover:bg-muted text-muted-foreground'}`}>
+                        <ChevronUp className="h-3.5 w-3.5" />
+                      </button>
+                      <button onClick={() => moveHeading(index, "down")} disabled={index === outline.length - 1} className={`p-1.5 rounded-lg transition-premium ${index === outline.length - 1 ? 'opacity-20' : 'hover:bg-muted text-muted-foreground'}`}>
+                        <ChevronDown className="h-3.5 w-3.5" />
+                      </button>
+                      <button onClick={() => deleteHeading(index)} className="p-1.5 rounded-lg hover:bg-destructive/10 text-destructive transition-premium">
+                        <Trash className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {/* Subheadings */}
+              {expanded[index] && (
+                <div className="p-5 space-y-2">
+                  {section.subheadings.map((sub, si) => (
+                    <div key={si} className="ml-6 flex items-center justify-between py-2 border-b border-border/50 last:border-0">
+                      {editingIndex === index && editingSubIndex === si ? (
+                        <div className="flex-1 flex items-center gap-2">
+                          <input
+                            type="text"
+                            className="artisan-input flex-1 text-sm"
+                            value={editingText}
+                            onChange={(e) => setEditingText(e.target.value)}
+                            onKeyDown={(e) => { if (e.key === 'Enter') saveEditing(); }}
+                            autoFocus
+                          />
+                          <button className="artisan-btn-ghost text-xs" onClick={cancelEditing}>Cancel</button>
+                          <button className="artisan-btn-primary text-xs py-1.5 px-2.5" onClick={saveEditing}>Save</button>
+                        </div>
+                      ) : (
+                        <>
+                          <div className="flex items-center gap-2">
+                            <div className="w-1.5 h-1.5 rounded-full bg-primary/40" />
+                            <span className="text-sm font-body text-foreground/80">{sub}</span>
+                          </div>
+                          <div className="flex items-center gap-0.5">
+                            <button onClick={() => startEditingSubheading(index, si)} className="p-1 rounded hover:bg-primary/10 text-primary transition-premium"><Edit className="h-3 w-3" /></button>
+                            <button onClick={() => moveSubheading(index, si, "up")} disabled={si === 0} className={`p-1 rounded transition-premium ${si === 0 ? 'opacity-20' : 'hover:bg-muted'}`}><ChevronUp className="h-3 w-3 text-muted-foreground" /></button>
+                            <button onClick={() => moveSubheading(index, si, "down")} disabled={si === section.subheadings.length - 1} className={`p-1 rounded transition-premium ${si === section.subheadings.length - 1 ? 'opacity-20' : 'hover:bg-muted'}`}><ChevronDown className="h-3 w-3 text-muted-foreground" /></button>
+                            <button onClick={() => deleteSubheading(index, si)} className="p-1 rounded hover:bg-destructive/10 text-destructive transition-premium"><Trash className="h-3 w-3" /></button>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  ))}
+                  <div className="ml-6 mt-3">
+                    <button className="artisan-btn-ghost text-xs border border-dashed border-border" onClick={() => addSubheading(index)}>
+                      <Plus className="h-3.5 w-3.5" /> Add Subsection
+                    </button>
+                  </div>
+                </div>
               )}
-              Regenerate Outline
-            </Button>
+            </div>
+          ))}
+
+          <div className="flex justify-center pt-4">
+            <button className="artisan-btn-secondary" onClick={addHeading}>
+              <Plus className="h-4 w-4" /> Add Section
+            </button>
           </div>
         </div>
+      )}
 
-        {loading ? (
-          <div className="flex flex-col items-center justify-center p-12">
-            <Loader2 className="h-12 w-12 text-blue-600 animate-spin mb-4" />
-            <p className="text-lg font-medium text-gray-700">Generating your outline...</p>
-            <p className="text-gray-500 text-center mt-2">
-              We're creating a comprehensive outline based on your topic and keywords
-            </p>
-          </div>
-        ) : outline.length === 0 ? (
-          <div className="text-center p-12 border border-dashed rounded-lg">
-            <p className="text-lg font-medium text-gray-700">No outline created yet</p>
-            <p className="text-gray-500 mt-2 mb-6">Click the button below to generate an outline for your article</p>
-            <Button onClick={handleRegenerateOutline}>Generate Outline</Button>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {outline.map((section, index) => (
-              <Card key={index} className="overflow-hidden">
-                <div className="p-4 bg-gray-50 border-b flex items-center justify-between">
-                  {editingIndex === index && editingSubIndex === null ? (
-                    <div className="flex-1 flex items-center">
-                      <input
-                        type="text"
-                        className="flex-1 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        value={editingText}
-                        onChange={(e) => setEditingText(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') saveEditing();
-                        }}
-                        autoFocus
-                      />
-                      <div className="ml-2 flex space-x-1">
-                        <Button size="sm" variant="outline" onClick={cancelEditing}>
-                          Cancel
-                        </Button>
-                        <Button size="sm" onClick={saveEditing}>
-                          Save
-                        </Button>
-                      </div>
-                    </div>
-                  ) : (
-                    <>
-                      <div className="flex items-center space-x-2">
-                        <button 
-                          onClick={() => toggleExpanded(index)}
-                          className="text-gray-500 hover:text-gray-700"
-                        >
-                          {expanded[index] ? (
-                            <ChevronUp className="h-5 w-5" />
-                          ) : (
-                            <ChevronDown className="h-5 w-5" />
-                          )}
-                        </button>
-                        <div className="font-medium text-lg">
-                          {section.heading}
-                        </div>
-                        {index === 0 || index === outline.length - 1 ? (
-                          <Badge variant="outline" className="ml-2">
-                            {index === 0 ? 'Intro' : 'Conclusion'}
-                          </Badge>
-                        ) : null}
-                      </div>
-                      <div className="flex items-center space-x-1">
-                        <button
-                          onClick={() => startEditingHeading(index)}
-                          className="p-1.5 rounded-full hover:bg-gray-200"
-                          title="Edit heading"
-                        >
-                          <Edit className="h-4 w-4 text-blue-600" />
-                        </button>
-                        <button
-                          onClick={() => moveHeading(index, "up")}
-                          disabled={index === 0}
-                          className={`p-1.5 rounded-full ${
-                            index === 0 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-gray-200'
-                          }`}
-                          title="Move up"
-                        >
-                          <ChevronUp className="h-4 w-4 text-gray-600" />
-                        </button>
-                        <button
-                          onClick={() => moveHeading(index, "down")}
-                          disabled={index === outline.length - 1}
-                          className={`p-1.5 rounded-full ${
-                            index === outline.length - 1 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-gray-200'
-                          }`}
-                          title="Move down"
-                        >
-                          <ChevronDown className="h-4 w-4 text-gray-600" />
-                        </button>
-                        <button
-                          onClick={() => deleteHeading(index)}
-                          className="p-1.5 rounded-full hover:bg-gray-200"
-                          title="Delete heading"
-                        >
-                          <Trash className="h-4 w-4 text-red-500" />
-                        </button>
-                      </div>
-                    </>
-                  )}
-                </div>
-                
-                {expanded[index] && (
-                  <div className="p-4">
-                    <div className="space-y-2">
-                      {section.subheadings.map((subheading, subIndex) => (
-                        <div 
-                          key={subIndex}
-                          className="ml-6 flex items-center justify-between border-b border-gray-100 pb-2"
-                        >
-                          {editingIndex === index && editingSubIndex === subIndex ? (
-                            <div className="flex-1 flex items-center">
-                              <input
-                                type="text"
-                                className="flex-1 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                value={editingText}
-                                onChange={(e) => setEditingText(e.target.value)}
-                                onKeyDown={(e) => {
-                                  if (e.key === 'Enter') saveEditing();
-                                }}
-                                autoFocus
-                              />
-                              <div className="ml-2 flex space-x-1">
-                                <Button size="sm" variant="outline" onClick={cancelEditing}>
-                                  Cancel
-                                </Button>
-                                <Button size="sm" onClick={saveEditing}>
-                                  Save
-                                </Button>
-                              </div>
-                            </div>
-                          ) : (
-                            <>
-                              <div className="text-gray-700">• {subheading}</div>
-                              <div className="flex items-center space-x-1">
-                                <button
-                                  onClick={() => startEditingSubheading(index, subIndex)}
-                                  className="p-1.5 rounded-full hover:bg-gray-200"
-                                  title="Edit subheading"
-                                >
-                                  <Edit className="h-3.5 w-3.5 text-blue-600" />
-                                </button>
-                                <button
-                                  onClick={() => moveSubheading(index, subIndex, "up")}
-                                  disabled={subIndex === 0}
-                                  className={`p-1.5 rounded-full ${
-                                    subIndex === 0 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-gray-200'
-                                  }`}
-                                  title="Move up"
-                                >
-                                  <ChevronUp className="h-3.5 w-3.5 text-gray-600" />
-                                </button>
-                                <button
-                                  onClick={() => moveSubheading(index, subIndex, "down")}
-                                  disabled={subIndex === section.subheadings.length - 1}
-                                  className={`p-1.5 rounded-full ${
-                                    subIndex === section.subheadings.length - 1 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-gray-200'
-                                  }`}
-                                  title="Move down"
-                                >
-                                  <ChevronDown className="h-3.5 w-3.5 text-gray-600" />
-                                </button>
-                                <button
-                                  onClick={() => deleteSubheading(index, subIndex)}
-                                  className="p-1.5 rounded-full hover:bg-gray-200"
-                                  title="Delete subheading"
-                                >
-                                  <Trash className="h-3.5 w-3.5 text-red-500" />
-                                </button>
-                              </div>
-                            </>
-                          )}
-                        </div>
-                      ))}
-                      <div className="ml-6 mt-3">
-                        <Button 
-                          size="sm" 
-                          variant="outline" 
-                          onClick={() => addSubheading(index)}
-                          className="text-blue-600 border-blue-200 hover:bg-blue-50"
-                        >
-                          <Plus className="h-3.5 w-3.5 mr-1" />
-                          Add Subsection
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
+      {/* Outline Preview */}
+      {outline.length > 0 && !loading && (
+        <div className="artisan-card p-6 border-primary/15 bg-primary/5">
+          <h3 className="text-xs font-body font-semibold tracking-[0.15em] uppercase text-primary mb-4">Outline Preview</h3>
+          <div className="space-y-3">
+            {outline.map((section, idx) => (
+              <div key={idx}>
+                <div className="text-sm font-body font-semibold text-foreground">{idx + 1}. {section.heading}</div>
+                {section.subheadings.length > 0 && (
+                  <ul className="ml-6 mt-1 space-y-0.5">
+                    {section.subheadings.map((sub, si) => (
+                      <li key={si} className="text-sm font-body text-muted-foreground flex items-center gap-2">
+                        <div className="w-1 h-1 rounded-full bg-primary/30" />
+                        {sub}
+                      </li>
+                    ))}
+                  </ul>
                 )}
-              </Card>
+              </div>
             ))}
-            
-            <div className="pt-4 flex justify-center">
-              <Button variant="outline" onClick={addHeading} className="flex items-center">
-                <Plus className="h-4 w-4 mr-2" />
-                Add New Section
-              </Button>
-            </div>
           </div>
-        )}
-
-        {outline.length > 0 && !loading && (
-          <div className="bg-blue-50 border border-blue-100 rounded-lg p-4">
-            <h3 className="font-medium text-blue-800 mb-2">Outline Preview</h3>
-            <div className="space-y-4">
-              {outline.map((section, idx) => (
-                <div key={idx} className="text-blue-800">
-                  <div className="font-medium">{idx + 1}. {section.heading}</div>
-                  {section.subheadings.length > 0 && (
-                    <ul className="ml-8 list-disc text-blue-700">
-                      {section.subheadings.map((sub, subIdx) => (
-                        <li key={subIdx} className="mt-1">
-                          {sub}
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-    
+        </div>
+      )}
+    </div>
   );
 }

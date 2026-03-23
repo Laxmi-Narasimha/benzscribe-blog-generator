@@ -1,36 +1,55 @@
 import { Link } from "react-router-dom";
+import { Feather } from "lucide-react";
+
 export function AppHeader() {
-  return <header className="sticky top-0 z-50 w-full border-b bg-white">
-      <div className="container flex h-16 items-center px-4 sm:px-6">
-        <div className="flex items-center">
-          <Link to="/" className="flex items-center space-x-2">
-            <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
+  return (
+    <header className="sticky top-0 z-50 w-full bg-glass border-b border-border/50">
+      <div className="container flex h-16 items-center px-6">
+        <Link to="/" className="flex items-center gap-3 group">
+          <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-primary/10 group-hover:bg-primary/15 transition-premium">
+            <Feather className="h-5 w-5 text-primary" />
+          </div>
+          <div className="flex flex-col">
+            <span className="text-xl font-display font-semibold text-gold-gradient leading-tight">
               BenzScribe
             </span>
-            <span className="text-sm text-gray-500 hidden lg:inline-block">by Benz Packaging Solutions</span>
-          </Link>
-        </div>
-        <div className="ml-auto flex items-center space-x-4">
-          <nav className="flex items-center space-x-2">
-            <Link to="/" className="text-sm font-medium transition-colors hover:text-blue-600">
-              Dashboard
-            </Link>
-            <Link to="/articles" className="text-sm font-medium transition-colors hover:text-blue-600">My Articles</Link>
-            <Link to="/templates" className="text-sm font-medium transition-colors hover:text-blue-600">
-              Templates
-            </Link>
+            <span className="text-[10px] font-body text-muted-foreground tracking-widest uppercase hidden lg:block">
+              by Benz Packaging Solutions
+            </span>
+          </div>
+        </Link>
+
+        <div className="ml-auto flex items-center gap-2">
+          <nav className="hidden md:flex items-center gap-1">
+            {[
+              { to: "/", label: "Studio" },
+              { to: "/articles", label: "Articles" },
+              { to: "/templates", label: "Templates" },
+            ].map((item) => (
+              <Link
+                key={item.to}
+                to={item.to}
+                className="px-4 py-2 rounded-lg text-sm font-body font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-premium"
+              >
+                {item.label}
+              </Link>
+            ))}
           </nav>
-          <div className="ml-4 flex items-center space-x-4">
-            <button className="inline-flex items-center justify-center text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input hover:bg-accent hover:text-accent-foreground h-9 rounded-md px-3">
-              Settings
+
+          <div className="ml-2 h-6 w-px bg-border hidden md:block" />
+
+          <button className="artisan-btn-ghost hidden md:flex">
+            Settings
+          </button>
+
+          <div className="relative">
+            <button className="flex items-center justify-center w-9 h-9 rounded-xl text-xs font-body font-bold text-primary-foreground overflow-hidden transition-premium hover:shadow-gold"
+              style={{ backgroundImage: 'linear-gradient(135deg, hsl(36, 72%, 48%), hsl(38, 80%, 55%))' }}>
+              BP
             </button>
-            <div className="relative">
-              <button className="relative h-8 w-8 rounded-full bg-blue-600 text-white flex items-center justify-center overflow-hidden">
-                BP
-              </button>
-            </div>
           </div>
         </div>
       </div>
-    </header>;
+    </header>
+  );
 }
