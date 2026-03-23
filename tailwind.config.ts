@@ -21,8 +21,8 @@ export default {
 		},
 		extend: {
 			fontFamily: {
-				display: ['"Cormorant Garamond"', 'Georgia', 'serif'],
-				body: ['"DM Sans"', 'system-ui', 'sans-serif'],
+				display: ['"Instrument Serif"', 'Georgia', 'serif'],
+				body: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
 				mono: ['"JetBrains Mono"', 'monospace'],
 			},
 			colors: {

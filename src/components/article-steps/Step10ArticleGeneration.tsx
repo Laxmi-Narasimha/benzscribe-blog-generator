@@ -1,7 +1,6 @@
 import * as React from "react";
 import { useArticle } from "@/context/ArticleContext";
 import { apiService } from "@/services/apiService";
-import { Button } from "@/components/ui/button";
 import { Check, Download, Loader2, RefreshCw, User, FileText, Sparkles } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -9,7 +8,6 @@ import { Separator } from "@/components/ui/separator";
 import { jsPDF } from "jspdf";
 import { Switch } from "@/components/ui/switch";
 import { marked } from "marked";
-import { Badge } from "@/components/ui/badge";
 
 export function Step10ArticleGeneration() {
   const { state, dispatch } = useArticle();
@@ -55,7 +53,7 @@ export function Step10ArticleGeneration() {
         toast({ title: "Article Generated", description: "Your article is ready.", variant: "default" });
       } catch {
         setGeneratingProgress("");
-        toast({ title: "Generation Error", description: "Failed to generate. Please try again.", variant: "destructive" });
+        toast({ title: "Error", description: "Failed to generate. Please try again.", variant: "destructive" });
       } finally {
         setLoading(false);
       }
@@ -176,7 +174,7 @@ export function Step10ArticleGeneration() {
       link.click();
       URL.revokeObjectURL(url);
     }
-    toast({ title: "Downloading", description: `Your article is downloading as ${downloadFormat.toUpperCase()}.`, variant: "default" });
+    toast({ title: "Downloading", description: `Exporting as ${downloadFormat.toUpperCase()}.`, variant: "default" });
   };
 
   const renderArticleContent = (content: string, featuredImage?: string) => {
@@ -188,9 +186,7 @@ export function Step10ArticleGeneration() {
       const titleRegex = /^#\s+(.+?)$/m;
       const titleMatch = titleRegex.exec(modifiedContent);
       const altText = titleMatch ? titleMatch[1] : 'Featured image';
-      const imgHtml = `\n\n<div style="position: relative; margin: 24px 0 32px 0; border-radius: 16px; overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,0.1);">
-        <img src="${featuredImage}" alt="${altText}" style="width: 100%; height: auto; display: block; max-height: 500px; object-fit: cover;" />
-      </div>\n\n`;
+      const imgHtml = `\n\n<div style="position: relative; margin: 24px 0 32px 0; border-radius: 16px; overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,0.1);"><img src="${featuredImage}" alt="${altText}" style="width: 100%; height: auto; display: block; max-height: 500px; object-fit: cover;" /></div>\n\n`;
       if (placeholderRegex.test(modifiedContent)) {
         modifiedContent = modifiedContent.replace(placeholderRegex, imgHtml);
       } else if (titleMatch) {
@@ -208,10 +204,6 @@ export function Step10ArticleGeneration() {
 
   return (
     <div className="space-y-8">
-      <p className="text-base font-body text-muted-foreground leading-relaxed max-w-2xl">
-        Your masterpiece is ready. Review, humanize, and export in your preferred format.
-      </p>
-
       {/* Action Bar */}
       <div className="artisan-card p-5">
         <div className="flex flex-wrap items-center gap-3">
@@ -225,18 +217,14 @@ export function Step10ArticleGeneration() {
           </button>
 
           <div className="flex items-center gap-2 ml-auto">
-            <span className="text-xs font-body text-muted-foreground">Real-time:</span>
+            <span className="text-xs font-body text-muted-foreground">Real-time</span>
             <Switch checked={showRealTimeGeneration} onCheckedChange={setShowRealTimeGeneration} />
           </div>
 
           <Separator orientation="vertical" className="h-8 hidden md:block" />
 
           <div className="flex items-center gap-2">
-            <select
-              className="artisan-select text-xs py-2 px-3 w-32"
-              value={downloadFormat}
-              onChange={(e) => setDownloadFormat(e.target.value as "markdown" | "txt" | "pdf")}
-            >
+            <select className="artisan-select text-xs py-2 px-3 w-32" value={downloadFormat} onChange={(e) => setDownloadFormat(e.target.value as "markdown" | "txt" | "pdf")}>
               <option value="markdown">Markdown</option>
               <option value="txt">Plain Text</option>
               <option value="pdf">PDF</option>
@@ -251,7 +239,7 @@ export function Step10ArticleGeneration() {
       {/* Real-time Progress */}
       {loading && generatingProgress && (
         <div className="artisan-card overflow-hidden animate-fade-up">
-          <div className="px-5 py-3 border-b border-border bg-muted/30 flex items-center gap-2">
+          <div className="px-5 py-3 border-b border-border bg-muted/20 flex items-center gap-2">
             <Loader2 className="h-4 w-4 animate-spin text-primary" />
             <span className="text-sm font-body font-medium text-foreground">Generating in Real-Time</span>
           </div>
@@ -271,22 +259,18 @@ export function Step10ArticleGeneration() {
       {state.generatedArticle ? (
         <div className="artisan-card overflow-hidden">
           <Tabs value={activeTab} onValueChange={(v: string) => setActiveTab(v as "original" | "humanized")}>
-            <div className="px-5 py-3 border-b border-border bg-muted/30">
+            <div className="px-5 py-3 border-b border-border bg-muted/20">
               <TabsList className="bg-transparent p-0 h-auto">
-                <TabsTrigger value="original" className="rounded-lg text-xs font-body data-[state=active]:bg-card data-[state=active]:shadow-sm px-4 py-2">
-                  Original
-                </TabsTrigger>
-                <TabsTrigger value="humanized" disabled={!state.humanizedArticle} className="rounded-lg text-xs font-body data-[state=active]:bg-card data-[state=active]:shadow-sm px-4 py-2">
-                  Humanized
-                </TabsTrigger>
+                <TabsTrigger value="original" className="rounded-lg text-xs font-body data-[state=active]:bg-card data-[state=active]:shadow-sm px-4 py-2">Original</TabsTrigger>
+                <TabsTrigger value="humanized" disabled={!state.humanizedArticle} className="rounded-lg text-xs font-body data-[state=active]:bg-card data-[state=active]:shadow-sm px-4 py-2">Humanized</TabsTrigger>
               </TabsList>
             </div>
             <TabsContent value="original" className="p-8 focus:outline-none">
-              <h1 className="text-4xl font-display font-semibold text-foreground mb-8">{state.title?.text || state.topic}</h1>
+              <h1 className="text-4xl font-display text-foreground mb-8">{state.title?.text || state.topic}</h1>
               {renderArticleContent(state.generatedArticle, state.enhancementContent?.featuredImage)}
             </TabsContent>
             <TabsContent value="humanized" className="p-8 focus:outline-none">
-              <h1 className="text-4xl font-display font-semibold text-foreground mb-8">{state.title?.text || state.topic}</h1>
+              <h1 className="text-4xl font-display text-foreground mb-8">{state.title?.text || state.topic}</h1>
               {state.humanizedArticle ? renderArticleContent(state.humanizedArticle, state.enhancementContent?.featuredImage) : (
                 <p className="text-muted-foreground font-body italic">No humanized version yet. Click "Humanize" above.</p>
               )}
@@ -294,18 +278,18 @@ export function Step10ArticleGeneration() {
           </Tabs>
         </div>
       ) : (
-        <div className="artisan-card p-12 text-center">
+        <div className="artisan-card p-16 text-center">
           {loading ? (
             <div className="flex flex-col items-center">
-              <Loader2 className="h-10 w-10 text-primary animate-spin mb-4" />
-              <p className="text-lg font-display font-semibold text-foreground">Crafting your article...</p>
-              <p className="text-sm font-body text-muted-foreground mt-1">This may take a moment depending on length.</p>
+              <Loader2 className="h-8 w-8 text-primary animate-spin mb-4" />
+              <p className="text-xl font-display text-foreground">Crafting your article...</p>
+              <p className="text-sm font-body text-muted-foreground mt-2">This may take a moment depending on length.</p>
             </div>
           ) : (
             <div className="flex flex-col items-center">
-              <FileText className="h-16 w-16 text-muted-foreground/20 mb-4" />
-              <p className="text-lg font-display font-semibold text-foreground mb-2">No article yet</p>
-              <p className="text-sm font-body text-muted-foreground mb-6">Click below to generate your article.</p>
+              <FileText className="h-16 w-16 text-muted-foreground/15 mb-4" />
+              <p className="text-xl font-display text-foreground mb-2">Ready to generate</p>
+              <p className="text-sm font-body text-muted-foreground mb-6">Click below to create your article.</p>
               <button className="artisan-btn-primary" onClick={handleRegenerateArticle}>
                 <Sparkles className="h-4 w-4" /> Generate Article
               </button>
@@ -319,14 +303,12 @@ export function Step10ArticleGeneration() {
         <>
           <Separator />
           <div>
-            <h3 className="text-xs font-body font-semibold tracking-[0.15em] uppercase text-muted-foreground mb-4">Included Enhancements</h3>
+            <h3 className="text-[10px] font-body font-semibold tracking-[0.12em] uppercase text-muted-foreground mb-4">Included Enhancements</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {state.enhancements.map(id => (
                 <div key={id} className="artisan-card p-4 flex items-center gap-3">
                   <Check className="h-4 w-4 text-primary shrink-0" />
-                  <span className="text-sm font-body font-medium text-foreground capitalize">
-                    {id.replace(/([A-Z])/g, ' $1').trim()}
-                  </span>
+                  <span className="text-sm font-body font-medium text-foreground capitalize">{id.replace(/([A-Z])/g, ' $1').trim()}</span>
                 </div>
               ))}
             </div>
@@ -334,15 +316,15 @@ export function Step10ArticleGeneration() {
         </>
       )}
 
-      {/* Completion Banner */}
-      <div className="artisan-card p-5 border-primary/20 bg-primary/5">
+      {/* Completion */}
+      <div className="artisan-card p-5 border-primary/10 bg-accent/30">
         <div className="flex items-start gap-3">
           <Sparkles className="h-5 w-5 text-primary shrink-0 mt-0.5" />
           <div>
             <h4 className="text-sm font-body font-semibold text-foreground mb-1">Generation Complete</h4>
             <p className="text-sm font-body text-muted-foreground leading-relaxed">
               Your {state.articleLength === "sm" ? "short" : state.articleLength === "md" ? "medium" : "long"} article
-              in {state.writingStyle} style with "{state.primaryKeyword?.text}" and {state.secondaryKeywords.length} secondary keywords is ready.
+              in {state.writingStyle} style with "{state.primaryKeyword?.text}" is ready for download.
             </p>
           </div>
         </div>

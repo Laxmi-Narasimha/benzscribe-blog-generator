@@ -2,8 +2,7 @@ import * as React from "react";
 import { useArticle } from "@/context/ArticleContext";
 import { apiService } from "@/services/apiService";
 import { ArticleTitle } from "@/lib/types";
-import { Badge } from "@/components/ui/badge";
-import { Check, Loader2, Pencil, RefreshCw, Star, Crown } from "lucide-react";
+import { Check, Loader2, Pencil, RefreshCw, Crown } from "lucide-react";
 
 export function Step5Title() {
   const { state, dispatch } = useArticle();
@@ -64,29 +63,15 @@ export function Step5Title() {
 
   return (
     <div className="space-y-8">
-      <p className="text-base font-body text-muted-foreground leading-relaxed max-w-2xl">
-        Choose a compelling, SEO-optimized title that captures your audience's attention.
-      </p>
-
       {/* Actions */}
       <div className="flex flex-wrap gap-3">
         {isEditing ? (
           <div className="flex-1 space-y-3">
             <div className="flex items-center gap-2">
-              <input
-                type="text"
-                className="artisan-input flex-1"
-                placeholder="Enter your custom title..."
-                value={customTitle}
-                onChange={(e) => setCustomTitle(e.target.value)}
-                onKeyDown={(e) => { if (e.key === 'Enter') handleCustomTitleSubmit(); }}
-                autoFocus
-              />
+              <input type="text" className="artisan-input flex-1" placeholder="Write your own title..." value={customTitle} onChange={(e) => setCustomTitle(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') handleCustomTitleSubmit(); }} autoFocus />
               <button className="artisan-btn-primary" onClick={handleCustomTitleSubmit}>Save</button>
             </div>
-            <button className="text-sm font-body text-muted-foreground hover:text-foreground transition-premium" onClick={() => setIsEditing(false)}>
-              Cancel
-            </button>
+            <button className="text-sm font-body text-muted-foreground hover:text-foreground transition-colors" onClick={() => setIsEditing(false)}>Cancel</button>
           </div>
         ) : (
           <>
@@ -103,12 +88,12 @@ export function Step5Title() {
       {/* Title List */}
       <div className="space-y-3">
         {loading ? (
-          <div className="flex flex-col items-center py-12 artisan-card">
-            <Loader2 className="h-8 w-8 text-primary animate-spin mb-3" />
+          <div className="flex flex-col items-center py-14 artisan-card">
+            <Loader2 className="h-7 w-7 text-primary animate-spin mb-3" />
             <p className="text-sm font-body text-muted-foreground">Crafting compelling titles...</p>
           </div>
         ) : titles.length === 0 ? (
-          <div className="flex flex-col items-center py-12 artisan-card">
+          <div className="flex flex-col items-center py-14 artisan-card">
             <p className="text-sm font-body text-muted-foreground">No titles generated yet.</p>
           </div>
         ) : (
@@ -117,37 +102,30 @@ export function Step5Title() {
             return (
               <div
                 key={title.id}
-                className={`artisan-card-interactive p-5 ${
-                  isSelected ? "border-primary shadow-gold ring-1 ring-primary/20" : ""
-                }`}
+                className={`artisan-card-interactive p-6 animate-fade-up ${isSelected ? "border-primary/40 shadow-gold ring-1 ring-primary/15" : ""}`}
                 onClick={() => handleTitleSelect(title.id)}
-                style={{ animationDelay: `${index * 0.05}s` }}
+                style={{ animationDelay: `${index * 0.06}s` }}
               >
                 <div className="flex items-start gap-4">
-                  <div className={`w-7 h-7 rounded-full border-2 flex items-center justify-center shrink-0 mt-0.5 transition-premium ${
-                    isSelected ? "bg-primary border-primary text-primary-foreground" : "border-border"
-                  }`}>
-                    {isSelected && <Check className="h-4 w-4" />}
+                  <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 mt-1 transition-all duration-300 ${isSelected ? "border-primary" : "border-border"}`}>
+                    {isSelected && <Check className="h-3.5 w-3.5 text-primary" />}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className={`font-display text-xl font-semibold leading-snug ${
-                      isSelected ? "text-foreground" : "text-foreground/80"
-                    }`}>
+                    <h3 className={`font-display text-xl leading-snug ${isSelected ? "text-foreground" : "text-foreground/75"}`}>
                       {title.text}
                     </h3>
-                    <div className="flex items-center gap-2 mt-2">
-                      {title.score && (
-                        <Badge
-                          variant={title.score >= 85 ? "success" : title.score >= 70 ? "warning" : "secondary"}
-                          className="text-[10px] font-mono"
-                        >
+                    {title.score && (
+                      <div className="flex items-center gap-2 mt-2.5">
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-lg text-[10px] font-mono ${
+                          title.score >= 85 ? "bg-emerald-50 text-emerald-700" : title.score >= 70 ? "bg-amber-50 text-amber-700" : "bg-muted text-muted-foreground"
+                        }`}>
                           Score: {title.score}/100
-                        </Badge>
-                      )}
-                      {title.id.startsWith('custom-') && (
-                        <Badge variant="outline" className="text-[10px]">Custom</Badge>
-                      )}
-                    </div>
+                        </span>
+                        {title.id.startsWith('custom-') && (
+                          <span className="text-[10px] font-body text-muted-foreground bg-muted px-2 py-0.5 rounded-lg">Custom</span>
+                        )}
+                      </div>
+                    )}
                   </div>
                   {title.score && title.score >= 90 && (
                     <Crown className="h-5 w-5 text-primary shrink-0" />
@@ -159,12 +137,11 @@ export function Step5Title() {
         )}
       </div>
 
+      {/* Selected */}
       {selectedTitleId && (
-        <div className="artisan-card p-5 border-primary/20 bg-primary/5 animate-fade-up">
-          <p className="text-xs font-body font-semibold tracking-[0.15em] uppercase text-primary mb-2">Selected Title</p>
-          <p className="text-lg font-display font-semibold text-foreground">
-            {titles.find(t => t.id === selectedTitleId)?.text || ""}
-          </p>
+        <div className="artisan-card p-6 border-primary/15 bg-accent/30 animate-fade-up">
+          <p className="text-[10px] font-body font-semibold tracking-[0.12em] uppercase text-primary mb-2">Selected Title</p>
+          <p className="text-lg font-display text-foreground">{titles.find(t => t.id === selectedTitleId)?.text || ""}</p>
         </div>
       )}
     </div>

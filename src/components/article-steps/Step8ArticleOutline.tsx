@@ -2,9 +2,7 @@ import * as React from "react";
 import { useArticle } from "@/context/ArticleContext";
 import { apiService } from "@/services/apiService";
 import { OutlineHeading } from "@/lib/types";
-import { Button } from "@/components/ui/button";
-import { Check, ChevronDown, ChevronUp, Edit, Loader2, Plus, Trash, RefreshCw, Save, GripVertical } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { ChevronDown, ChevronUp, Edit, Loader2, Plus, Trash, RefreshCw, Save, GripVertical } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 
 export function Step8ArticleOutline() {
@@ -30,10 +28,10 @@ export function Step8ArticleOutline() {
           const newExpanded: Record<number, boolean> = {};
           data.forEach((_, index) => { newExpanded[index] = true; });
           setExpanded(newExpanded);
-          toast({ title: "Outline Generated", description: "Your article outline has been successfully generated.", variant: "default" });
+          toast({ title: "Outline Generated", description: "Your article outline has been created.", variant: "default" });
         } catch (error) {
           console.error("Error generating outline:", error);
-          toast({ title: "Error", description: "Failed to generate outline. Please try again.", variant: "destructive" });
+          toast({ title: "Error", description: "Failed to generate outline.", variant: "destructive" });
         } finally {
           setLoading(false);
         }
@@ -49,7 +47,7 @@ export function Step8ArticleOutline() {
 
   const handleSaveOutline = () => {
     dispatch({ type: "SET_OUTLINE", payload: outline });
-    toast({ title: "Outline Saved", description: "Your outline has been saved.", variant: "default" });
+    toast({ title: "Saved", description: "Outline saved successfully.", variant: "default" });
   };
 
   const handleRegenerateOutline = async () => {
@@ -63,10 +61,10 @@ export function Step8ArticleOutline() {
       const newExpanded: Record<number, boolean> = {};
       data.forEach((_, index) => { newExpanded[index] = true; });
       setExpanded(newExpanded);
-      toast({ title: "Outline Regenerated", description: "New outline created.", variant: "default" });
+      toast({ title: "Regenerated", description: "New outline created.", variant: "default" });
     } catch (error) {
       console.error("Error regenerating outline:", error);
-      toast({ title: "Error", description: "Failed to regenerate. Please try again.", variant: "destructive" });
+      toast({ title: "Error", description: "Failed to regenerate.", variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -125,10 +123,6 @@ export function Step8ArticleOutline() {
 
   return (
     <div className="space-y-8">
-      <p className="text-base font-body text-muted-foreground leading-relaxed max-w-2xl">
-        Sculpt the perfect structure. Edit, rearrange, or add sections to create a compelling narrative flow.
-      </p>
-
       {/* Actions */}
       <div className="flex flex-wrap items-center gap-3">
         <button className="artisan-btn-primary" onClick={handleSaveOutline} disabled={loading}>
@@ -141,14 +135,14 @@ export function Step8ArticleOutline() {
       </div>
 
       {loading ? (
-        <div className="flex flex-col items-center py-16 artisan-card">
-          <Loader2 className="h-10 w-10 text-primary animate-spin mb-4" />
-          <p className="text-lg font-display font-semibold text-foreground">Crafting your outline...</p>
-          <p className="text-sm font-body text-muted-foreground mt-1">Creating a comprehensive structure based on your inputs</p>
+        <div className="flex flex-col items-center py-20 artisan-card">
+          <Loader2 className="h-8 w-8 text-primary animate-spin mb-4" />
+          <p className="text-lg font-display text-foreground">Crafting your outline...</p>
+          <p className="text-sm font-body text-muted-foreground mt-1">Building a comprehensive structure</p>
         </div>
       ) : outline.length === 0 ? (
-        <div className="text-center py-16 artisan-card border-dashed">
-          <p className="text-lg font-display font-semibold text-foreground mb-2">No outline yet</p>
+        <div className="text-center py-20 artisan-card border-dashed">
+          <p className="text-lg font-display text-foreground mb-2">No outline yet</p>
           <p className="text-sm font-body text-muted-foreground mb-6">Generate an outline to get started</p>
           <button className="artisan-btn-primary" onClick={handleRegenerateOutline}>Generate Outline</button>
         </div>
@@ -156,80 +150,56 @@ export function Step8ArticleOutline() {
         <div className="space-y-3">
           {outline.map((section, index) => (
             <div key={index} className="artisan-card overflow-hidden animate-fade-up" style={{ animationDelay: `${index * 0.05}s` }}>
-              {/* Section Header */}
-              <div className="px-5 py-4 bg-muted/30 border-b border-border flex items-center justify-between">
+              <div className="px-5 py-4 bg-muted/20 border-b border-border flex items-center justify-between">
                 {editingIndex === index && editingSubIndex === null ? (
                   <div className="flex-1 flex items-center gap-2">
-                    <input
-                      type="text"
-                      className="artisan-input flex-1"
-                      value={editingText}
-                      onChange={(e) => setEditingText(e.target.value)}
-                      onKeyDown={(e) => { if (e.key === 'Enter') saveEditing(); }}
-                      autoFocus
-                    />
+                    <input type="text" className="artisan-input flex-1" value={editingText} onChange={(e) => setEditingText(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') saveEditing(); }} autoFocus />
                     <button className="artisan-btn-ghost text-xs" onClick={cancelEditing}>Cancel</button>
                     <button className="artisan-btn-primary text-xs py-2 px-3" onClick={saveEditing}>Save</button>
                   </div>
                 ) : (
                   <>
                     <div className="flex items-center gap-3">
-                      <button onClick={() => toggleExpanded(index)} className="text-muted-foreground hover:text-foreground transition-premium">
+                      <button onClick={() => toggleExpanded(index)} className="text-muted-foreground hover:text-foreground transition-colors">
                         {expanded[index] ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                       </button>
-                      <GripVertical className="h-4 w-4 text-muted-foreground/40" />
-                      <h4 className="font-display text-lg font-semibold text-foreground">{section.heading}</h4>
+                      <GripVertical className="h-4 w-4 text-muted-foreground/30" />
+                      <h4 className="font-display text-lg text-foreground">{section.heading}</h4>
                       {(index === 0 || index === outline.length - 1) && (
-                        <Badge variant="outline" className="text-[10px] font-body">{index === 0 ? 'Introduction' : 'Conclusion'}</Badge>
+                        <span className="text-[10px] font-body text-muted-foreground bg-muted px-2 py-0.5 rounded-lg">{index === 0 ? 'Intro' : 'Conclusion'}</span>
                       )}
                     </div>
                     <div className="flex items-center gap-0.5">
-                      <button onClick={() => startEditingHeading(index)} className="p-1.5 rounded-lg hover:bg-primary/10 text-primary transition-premium" title="Edit">
-                        <Edit className="h-3.5 w-3.5" />
-                      </button>
-                      <button onClick={() => moveHeading(index, "up")} disabled={index === 0} className={`p-1.5 rounded-lg transition-premium ${index === 0 ? 'opacity-20' : 'hover:bg-muted text-muted-foreground'}`}>
-                        <ChevronUp className="h-3.5 w-3.5" />
-                      </button>
-                      <button onClick={() => moveHeading(index, "down")} disabled={index === outline.length - 1} className={`p-1.5 rounded-lg transition-premium ${index === outline.length - 1 ? 'opacity-20' : 'hover:bg-muted text-muted-foreground'}`}>
-                        <ChevronDown className="h-3.5 w-3.5" />
-                      </button>
-                      <button onClick={() => deleteHeading(index)} className="p-1.5 rounded-lg hover:bg-destructive/10 text-destructive transition-premium">
-                        <Trash className="h-3.5 w-3.5" />
-                      </button>
+                      <button onClick={() => startEditingHeading(index)} className="p-1.5 rounded-lg hover:bg-primary/10 text-primary transition-colors"><Edit className="h-3.5 w-3.5" /></button>
+                      <button onClick={() => moveHeading(index, "up")} disabled={index === 0} className={`p-1.5 rounded-lg transition-colors ${index === 0 ? 'opacity-20' : 'hover:bg-muted'}`}><ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /></button>
+                      <button onClick={() => moveHeading(index, "down")} disabled={index === outline.length - 1} className={`p-1.5 rounded-lg transition-colors ${index === outline.length - 1 ? 'opacity-20' : 'hover:bg-muted'}`}><ChevronDown className="h-3.5 w-3.5 text-muted-foreground" /></button>
+                      <button onClick={() => deleteHeading(index)} className="p-1.5 rounded-lg hover:bg-destructive/10 text-destructive transition-colors"><Trash className="h-3.5 w-3.5" /></button>
                     </div>
                   </>
                 )}
               </div>
 
-              {/* Subheadings */}
               {expanded[index] && (
                 <div className="p-5 space-y-2">
                   {section.subheadings.map((sub, si) => (
-                    <div key={si} className="ml-6 flex items-center justify-between py-2 border-b border-border/50 last:border-0">
+                    <div key={si} className="ml-6 flex items-center justify-between py-2 border-b border-border/40 last:border-0">
                       {editingIndex === index && editingSubIndex === si ? (
                         <div className="flex-1 flex items-center gap-2">
-                          <input
-                            type="text"
-                            className="artisan-input flex-1 text-sm"
-                            value={editingText}
-                            onChange={(e) => setEditingText(e.target.value)}
-                            onKeyDown={(e) => { if (e.key === 'Enter') saveEditing(); }}
-                            autoFocus
-                          />
+                          <input type="text" className="artisan-input flex-1 text-sm" value={editingText} onChange={(e) => setEditingText(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') saveEditing(); }} autoFocus />
                           <button className="artisan-btn-ghost text-xs" onClick={cancelEditing}>Cancel</button>
                           <button className="artisan-btn-primary text-xs py-1.5 px-2.5" onClick={saveEditing}>Save</button>
                         </div>
                       ) : (
                         <>
                           <div className="flex items-center gap-2">
-                            <div className="w-1.5 h-1.5 rounded-full bg-primary/40" />
-                            <span className="text-sm font-body text-foreground/80">{sub}</span>
+                            <div className="w-1.5 h-1.5 rounded-full bg-primary/30" />
+                            <span className="text-sm font-body text-foreground/70">{sub}</span>
                           </div>
                           <div className="flex items-center gap-0.5">
-                            <button onClick={() => startEditingSubheading(index, si)} className="p-1 rounded hover:bg-primary/10 text-primary transition-premium"><Edit className="h-3 w-3" /></button>
-                            <button onClick={() => moveSubheading(index, si, "up")} disabled={si === 0} className={`p-1 rounded transition-premium ${si === 0 ? 'opacity-20' : 'hover:bg-muted'}`}><ChevronUp className="h-3 w-3 text-muted-foreground" /></button>
-                            <button onClick={() => moveSubheading(index, si, "down")} disabled={si === section.subheadings.length - 1} className={`p-1 rounded transition-premium ${si === section.subheadings.length - 1 ? 'opacity-20' : 'hover:bg-muted'}`}><ChevronDown className="h-3 w-3 text-muted-foreground" /></button>
-                            <button onClick={() => deleteSubheading(index, si)} className="p-1 rounded hover:bg-destructive/10 text-destructive transition-premium"><Trash className="h-3 w-3" /></button>
+                            <button onClick={() => startEditingSubheading(index, si)} className="p-1 rounded hover:bg-primary/10 text-primary transition-colors"><Edit className="h-3 w-3" /></button>
+                            <button onClick={() => moveSubheading(index, si, "up")} disabled={si === 0} className={`p-1 rounded transition-colors ${si === 0 ? 'opacity-20' : 'hover:bg-muted'}`}><ChevronUp className="h-3 w-3 text-muted-foreground" /></button>
+                            <button onClick={() => moveSubheading(index, si, "down")} disabled={si === section.subheadings.length - 1} className={`p-1 rounded transition-colors ${si === section.subheadings.length - 1 ? 'opacity-20' : 'hover:bg-muted'}`}><ChevronDown className="h-3 w-3 text-muted-foreground" /></button>
+                            <button onClick={() => deleteSubheading(index, si)} className="p-1 rounded hover:bg-destructive/10 text-destructive transition-colors"><Trash className="h-3 w-3" /></button>
                           </div>
                         </>
                       )}
@@ -255,8 +225,8 @@ export function Step8ArticleOutline() {
 
       {/* Outline Preview */}
       {outline.length > 0 && !loading && (
-        <div className="artisan-card p-6 border-primary/15 bg-primary/5">
-          <h3 className="text-xs font-body font-semibold tracking-[0.15em] uppercase text-primary mb-4">Outline Preview</h3>
+        <div className="artisan-card p-6 border-primary/10 bg-accent/30">
+          <h3 className="text-[10px] font-body font-semibold tracking-[0.12em] uppercase text-primary mb-4">Outline Preview</h3>
           <div className="space-y-3">
             {outline.map((section, idx) => (
               <div key={idx}>
@@ -265,8 +235,7 @@ export function Step8ArticleOutline() {
                   <ul className="ml-6 mt-1 space-y-0.5">
                     {section.subheadings.map((sub, si) => (
                       <li key={si} className="text-sm font-body text-muted-foreground flex items-center gap-2">
-                        <div className="w-1 h-1 rounded-full bg-primary/30" />
-                        {sub}
+                        <div className="w-1 h-1 rounded-full bg-primary/25" /> {sub}
                       </li>
                     ))}
                   </ul>
