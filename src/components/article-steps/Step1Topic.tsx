@@ -60,7 +60,7 @@ export function Step1Topic() {
 
   // Generate AI title suggestions when the topic changes
   React.useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
+    let timeoutId: ReturnType<typeof setTimeout>;
     
     const generateSuggestions = async () => {
       if (!state.topic || state.topic.trim().length < 3) {
