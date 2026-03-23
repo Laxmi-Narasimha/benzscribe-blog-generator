@@ -2,7 +2,15 @@ import * as React from "react";
 import { useArticle } from "@/context/ArticleContext";
 import { ARTICLE_TYPES, RESEARCH_METHODS } from "@/lib/constants";
 import { Badge } from "@/components/ui/badge";
-import { Link } from "lucide-react";
+import { Check, FileText, BookOpen, Clipboard, Package, Box, Star } from "lucide-react";
+
+const ICON_MAP: Record<string, React.ReactNode> = {
+  "file-text": <FileText className="h-5 w-5" />,
+  "box": <Box className="h-5 w-5" />,
+  "book-open": <BookOpen className="h-5 w-5" />,
+  "clipboard": <Clipboard className="h-5 w-5" />,
+  "package": <Package className="h-5 w-5" />,
+};
 
 export function Step2ArticleType() {
   const { state, dispatch } = useArticle();
@@ -12,104 +20,97 @@ export function Step2ArticleType() {
     dispatch({ type: "SET_ARTICLE_TYPE", payload: articleTypeId });
   };
 
-  const handleResearchMethodSelect = (methodId: string) => {
-    setSelectedResearchMethod(methodId);
-  };
-
   return (
-    <div className="space-y-8">
-      <div>
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-medium mb-4">Article Type and Research Method</h2>
-          <button className="flex items-center text-sm text-blue-600 hover:text-blue-800">
-            <Link className="h-4 w-4 mr-1" />
-            Why This matters
-          </button>
+    <div className="space-y-10">
+      <p className="text-base font-body text-muted-foreground leading-relaxed max-w-2xl">
+        Choose your article format and research methodology to craft the perfect piece.
+      </p>
+
+      {/* Article Type */}
+      <div className="space-y-4">
+        <h3 className="text-xs font-body font-semibold tracking-[0.15em] uppercase text-muted-foreground">
+          Article Format
+        </h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {ARTICLE_TYPES.map((type) => {
+            const isSelected = state.articleType === type.id;
+            return (
+              <button
+                key={type.id}
+                className={`artisan-card-interactive p-5 text-left ${
+                  isSelected ? "border-primary shadow-gold ring-1 ring-primary/20" : ""
+                }`}
+                onClick={() => handleArticleTypeClick(type.id)}
+              >
+                <div className="flex items-start justify-between mb-3">
+                  <div className={`p-2.5 rounded-xl transition-premium ${
+                    isSelected ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
+                  }`}>
+                    {ICON_MAP[type.icon || "file-text"] || <FileText className="h-5 w-5" />}
+                  </div>
+                  {isSelected && (
+                    <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center">
+                      <Check className="h-3.5 w-3.5 text-primary-foreground" />
+                    </div>
+                  )}
+                </div>
+                <span className="text-sm font-body font-semibold text-foreground">{type.name}</span>
+                {type.id === 'product' && (
+                  <Badge variant="pro" className="mt-2 text-[10px]">Recommended</Badge>
+                )}
+              </button>
+            );
+          })}
         </div>
-        <p className="text-gray-600 mb-6">
-          Choose your Article type and how you want to gather information for it
-        </p>
       </div>
 
-      <div className="space-y-6">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Article Type
-          </label>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-            {ARTICLE_TYPES.map((type) => {
-              const isSelected = state.articleType === type.id;
-              
-              return (
-                <button
-                  key={type.id}
-                  className={`flex items-center p-4 border rounded-md transition-all ${
-                    isSelected 
-                      ? "border-blue-600 bg-blue-50 ring-2 ring-blue-600/50" 
-                      : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
-                  }`}
-                  onClick={() => handleArticleTypeClick(type.id)}
-                >
-                  <div className="flex-1 text-left">
-                    <span className="text-sm font-medium">{type.name}</span>
+      {/* Research Method */}
+      <div className="space-y-4">
+        <h3 className="text-xs font-body font-semibold tracking-[0.15em] uppercase text-muted-foreground">
+          Research Method
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          {RESEARCH_METHODS.map((method) => {
+            const isSelected = selectedResearchMethod === method.id;
+            return (
+              <div
+                key={method.id}
+                className={`artisan-card p-6 cursor-pointer transition-premium ${
+                  isSelected ? "border-primary shadow-gold ring-1 ring-primary/20" : "hover:border-muted-foreground/20"
+                }`}
+                onClick={() => setSelectedResearchMethod(method.id)}
+              >
+                <div className="flex items-start justify-between mb-4">
+                  <div>
+                    <h4 className="font-display text-xl font-semibold text-foreground mb-1">{method.name}</h4>
+                    <p className="text-sm font-body text-muted-foreground">{method.description}</p>
                   </div>
-                  {type.id === 'product' && (
-                    <Badge variant="success" className="ml-2">Recommended</Badge>
+                  {method.recommended && (
+                    <Badge variant="pro" className="text-[10px] shrink-0">
+                      <Star className="h-3 w-3 mr-0.5" /> Best
+                    </Badge>
                   )}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        <div className="mt-8">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Research Method
-          </label>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {RESEARCH_METHODS.map((method) => {
-              const isSelected = selectedResearchMethod === method.id;
-              
-              return (
-                <div 
-                  key={method.id}
-                  className={`border rounded-xl p-6 transition-all ${
-                    isSelected 
-                      ? "border-blue-600 bg-blue-50" 
-                      : "border-gray-200"
+                </div>
+                <ul className="space-y-2 mb-5">
+                  {method.benefits.map((benefit, index) => (
+                    <li key={index} className="flex items-center gap-2 text-sm font-body text-foreground/70">
+                      <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+                      {benefit}
+                    </li>
+                  ))}
+                </ul>
+                <button
+                  className={`w-full py-2.5 rounded-xl text-sm font-body font-medium transition-premium ${
+                    isSelected
+                      ? "artisan-btn-primary justify-center"
+                      : "artisan-btn-secondary justify-center"
                   }`}
                 >
-                  <div className="flex items-start justify-between mb-4">
-                    <div>
-                      <h3 className="font-medium text-lg mb-1">{method.name}</h3>
-                      <p className="text-gray-600 text-sm">{method.description}</p>
-                    </div>
-                    {method.recommended && (
-                      <Badge variant="success">Recommended</Badge>
-                    )}
-                  </div>
-                  <ul className="space-y-2 mb-4">
-                    {method.benefits.map((benefit, index) => (
-                      <li key={index} className="flex items-start">
-                        <span className="text-blue-600 mr-2">•</span>
-                        <span className="text-sm">{benefit}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <button
-                    className={`w-full py-2 px-4 rounded-md border text-sm font-medium ${
-                      isSelected 
-                        ? "bg-blue-600 text-white border-blue-600" 
-                        : "border-gray-300 text-gray-700 hover:bg-gray-50"
-                    }`}
-                    onClick={() => handleResearchMethodSelect(method.id)}
-                  >
-                    {isSelected ? "Selected" : "Select Method"}
-                  </button>
-                </div>
-              );
-            })}
-          </div>
+                  {isSelected ? "Selected" : "Select Method"}
+                </button>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>
