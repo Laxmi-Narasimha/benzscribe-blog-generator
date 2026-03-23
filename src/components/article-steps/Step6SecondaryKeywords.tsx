@@ -2,7 +2,6 @@ import * as React from "react";
 import { useArticle } from "@/context/ArticleContext";
 import { apiService } from "@/services/apiService";
 import { Keyword } from "@/lib/types";
-import { Badge } from "@/components/ui/badge";
 import { Check, Loader2, Plus, Search, X, Lightbulb } from "lucide-react";
 
 const MAX_SECONDARY_KEYWORDS = 20;
@@ -12,9 +11,7 @@ export function Step6SecondaryKeywords() {
   const [loading, setLoading] = React.useState(false);
   const [keywords, setKeywords] = React.useState<Keyword[]>([]);
   const [searchTerm, setSearchTerm] = React.useState("");
-  const [selectedKeywordIds, setSelectedKeywordIds] = React.useState<string[]>(
-    state.secondaryKeywords.map(k => k.id) || []
-  );
+  const [selectedKeywordIds, setSelectedKeywordIds] = React.useState<string[]>(state.secondaryKeywords.map(k => k.id) || []);
   const [customKeyword, setCustomKeyword] = React.useState("");
 
   React.useEffect(() => {
@@ -52,9 +49,7 @@ export function Step6SecondaryKeywords() {
     fetchSecondaryKeywords();
   }, [state.primaryKeyword, state.topic]);
 
-  const filteredKeywords = keywords.filter(keyword =>
-    keyword.text.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredKeywords = keywords.filter(k => k.text.toLowerCase().includes(searchTerm.toLowerCase()));
 
   const handleKeywordToggle = (keywordId: string) => {
     let newSelectedIds: string[];
@@ -70,10 +65,7 @@ export function Step6SecondaryKeywords() {
 
   const handleCustomKeywordAdd = () => {
     if (!customKeyword.trim()) return;
-    const newKeyword: Keyword = {
-      id: `custom-${Date.now()}`, text: customKeyword.trim(),
-      volume: Math.floor(Math.random() * 800) + 100, difficulty: Math.floor(Math.random() * 50) + 20
-    };
+    const newKeyword: Keyword = { id: `custom-${Date.now()}`, text: customKeyword.trim(), volume: Math.floor(Math.random() * 800) + 100, difficulty: Math.floor(Math.random() * 50) + 20 };
     setKeywords(prev => [newKeyword, ...prev]);
     let newSelectedIds = selectedKeywordIds;
     if (selectedKeywordIds.length < MAX_SECONDARY_KEYWORDS) {
@@ -92,27 +84,21 @@ export function Step6SecondaryKeywords() {
 
   return (
     <div className="space-y-8">
-      <p className="text-base font-body text-muted-foreground leading-relaxed max-w-2xl">
-        Choose up to {MAX_SECONDARY_KEYWORDS} semantic keywords to strengthen your article's SEO context.
-      </p>
-
       {/* Selected Keywords Chips */}
       {selectedKeywordIds.length > 0 && (
-        <div className="artisan-card p-4">
+        <div className="artisan-card p-5">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-body font-semibold tracking-[0.15em] uppercase text-muted-foreground">Selected</span>
-            <Badge variant="secondary" className="font-mono text-[10px]">{selectedKeywordIds.length}/{MAX_SECONDARY_KEYWORDS}</Badge>
+            <span className="text-[10px] font-body font-semibold tracking-[0.12em] uppercase text-muted-foreground">Selected</span>
+            <span className="text-[10px] font-mono text-muted-foreground bg-muted px-2 py-0.5 rounded-lg">{selectedKeywordIds.length}/{MAX_SECONDARY_KEYWORDS}</span>
           </div>
           <div className="flex flex-wrap gap-2">
             {selectedKeywordIds.map(id => {
               const keyword = keywords.find(k => k.id === id);
               if (!keyword) return null;
               return (
-                <div key={id} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-body font-medium transition-premium hover:bg-primary/15">
+                <div key={id} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-accent text-accent-foreground text-sm font-body font-medium transition-all duration-200 hover:bg-primary/10">
                   {keyword.text}
-                  <button onClick={() => removeSelectedKeyword(id)} className="hover:text-destructive transition-premium">
-                    <X className="h-3.5 w-3.5" />
-                  </button>
+                  <button onClick={() => removeSelectedKeyword(id)} className="hover:text-destructive transition-colors"><X className="h-3.5 w-3.5" /></button>
                 </div>
               );
             })}
@@ -122,64 +108,39 @@ export function Step6SecondaryKeywords() {
 
       {/* Add Custom */}
       <div className="flex items-center gap-2">
-        <input
-          type="text"
-          className="artisan-input flex-1"
-          placeholder="Enter a custom keyword..."
-          value={customKeyword}
-          onChange={(e) => setCustomKeyword(e.target.value)}
-          onKeyDown={(e) => { if (e.key === 'Enter') handleCustomKeywordAdd(); }}
-        />
-        <button className="artisan-btn-primary" onClick={handleCustomKeywordAdd}>
-          <Plus className="h-4 w-4" />
-        </button>
+        <input type="text" className="artisan-input flex-1" placeholder="Add a custom keyword..." value={customKeyword} onChange={(e) => setCustomKeyword(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') handleCustomKeywordAdd(); }} />
+        <button className="artisan-btn-primary" onClick={handleCustomKeywordAdd}><Plus className="h-4 w-4" /></button>
       </div>
 
       {/* Keywords List */}
       <div className="artisan-card overflow-hidden">
         <div className="p-5 border-b border-border">
           <div className="relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <input
-              type="text"
-              className="artisan-input pl-11"
-              placeholder="Search keywords..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
+            <input type="text" className="artisan-input pl-11" placeholder="Search keywords..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
           </div>
         </div>
 
         <div className="max-h-80 overflow-y-auto divide-y divide-border">
           {loading ? (
-            <div className="flex flex-col items-center py-12">
-              <Loader2 className="h-8 w-8 text-primary animate-spin mb-3" />
+            <div className="flex flex-col items-center py-14">
+              <Loader2 className="h-7 w-7 text-primary animate-spin mb-3" />
               <p className="text-sm font-body text-muted-foreground">Loading related keywords...</p>
             </div>
           ) : filteredKeywords.length === 0 ? (
-            <div className="flex flex-col items-center py-12">
+            <div className="flex flex-col items-center py-14">
               <p className="text-sm font-body text-muted-foreground">No keywords found.</p>
             </div>
           ) : (
             filteredKeywords.map((keyword) => {
               const isSelected = selectedKeywordIds.includes(keyword.id);
               return (
-                <div
-                  key={keyword.id}
-                  className={`flex items-center gap-4 px-5 py-4 cursor-pointer transition-premium ${
-                    isSelected ? "bg-primary/5" : "hover:bg-muted/30"
-                  }`}
-                  onClick={() => handleKeywordToggle(keyword.id)}
-                >
-                  <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-premium ${
-                    isSelected ? "bg-primary border-primary text-primary-foreground" : "border-border"
-                  }`}>
-                    {isSelected && <Check className="h-3.5 w-3.5" />}
+                <div key={keyword.id} className={`flex items-center gap-4 px-5 py-4 cursor-pointer transition-all duration-200 ${isSelected ? "bg-accent/50" : "hover:bg-muted/30"}`} onClick={() => handleKeywordToggle(keyword.id)}>
+                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all duration-300 ${isSelected ? "border-primary" : "border-border"}`}>
+                    {isSelected && <Check className="h-3 w-3 text-primary" />}
                   </div>
                   <span className="flex-1 text-sm font-body font-medium text-foreground">{keyword.text}</span>
-                  <span className="text-xs font-mono text-muted-foreground">
-                    {keyword.volume && `${keyword.volume.toLocaleString()}/mo`}
-                  </span>
+                  <span className="text-xs font-mono text-muted-foreground">{keyword.volume && `${keyword.volume.toLocaleString()}/mo`}</span>
                 </div>
               );
             })
@@ -188,7 +149,7 @@ export function Step6SecondaryKeywords() {
       </div>
 
       {/* Pro Tip */}
-      <div className="artisan-card p-5 border-primary/15 bg-primary/5">
+      <div className="artisan-card p-5 border-primary/10 bg-accent/30">
         <div className="flex items-start gap-3">
           <Lightbulb className="h-5 w-5 text-primary shrink-0 mt-0.5" />
           <div>

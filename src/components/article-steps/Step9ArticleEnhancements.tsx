@@ -1,12 +1,9 @@
 import * as React from "react";
 import { useArticle } from "@/context/ArticleContext";
-import { Button } from "@/components/ui/button";
 import { Check, Plus, Loader2, Lightbulb, Image, MessageSquare, List, Quote, Zap, Share2, BookOpen } from "lucide-react";
 import { apiService } from "@/services/apiService";
 import { useToast } from "@/components/ui/use-toast";
-import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 
 interface Enhancement {
@@ -81,7 +78,7 @@ export function Step9ArticleEnhancements() {
     Object.entries(previewContent).forEach(([id, content]) => {
       if (selectedEnhancements.includes(id)) dispatch({ type: "SET_ENHANCEMENT_CONTENT", payload: { id, content } });
     });
-    toast({ title: "Enhancements Saved", description: `${selectedEnhancements.length} enhancement(s) saved.`, variant: "default" });
+    toast({ title: "Saved", description: `${selectedEnhancements.length} enhancement(s) saved.`, variant: "default" });
   };
 
   const generatePreview = async (enhancementId: string) => {
@@ -90,13 +87,13 @@ export function Step9ArticleEnhancements() {
     try {
       const articleText = state.generatedArticle || '';
       if (!articleText) {
-        toast({ title: "Missing Article", description: "No article text available.", variant: "destructive" });
+        toast({ title: "No Article", description: "Generate article first.", variant: "destructive" });
         return;
       }
       const content = await apiService.generateEnhancement(enhancementId, articleText, state.primaryKeyword?.text || '');
       setPreviewContent(prev => ({ ...prev, [enhancementId]: content }));
       if (!selectedEnhancements.includes(enhancementId)) setSelectedEnhancements(prev => [...prev, enhancementId]);
-      toast({ title: "Generated", description: `Enhancement generated successfully.`, variant: "default" });
+      toast({ title: "Generated", description: "Enhancement ready.", variant: "default" });
     } catch {
       const content = `Sample ${enhancementId} content. In production, this would be AI-generated.`;
       setPreviewContent(prev => ({ ...prev, [enhancementId]: content }));
@@ -137,9 +134,7 @@ export function Step9ArticleEnhancements() {
     <div key={enhancement.id} className="artisan-card p-5 space-y-4 animate-fade-up">
       <div className="flex items-start justify-between">
         <div className="flex items-start gap-3">
-          <div className={`p-2.5 rounded-xl transition-premium ${
-            enhancement.selected ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
-          }`}>
+          <div className={`p-2.5 rounded-xl transition-all duration-300 ${enhancement.selected ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
             {enhancement.icon}
           </div>
           <div>
@@ -150,32 +145,23 @@ export function Step9ArticleEnhancements() {
               onClick={() => enhancement.id === "featuredImage" ? generateImagePreview() : generatePreview(enhancement.id)}
               disabled={isGenerating[enhancement.id] || (loading && activePreview === enhancement.id)}
             >
-              {(isGenerating[enhancement.id] || (loading && activePreview === enhancement.id)) ? (
-                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-              ) : (
-                <Plus className="h-3.5 w-3.5" />
-              )}
+              {(isGenerating[enhancement.id] || (loading && activePreview === enhancement.id)) ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}
               Preview
             </button>
           </div>
         </div>
-        <Checkbox
-          id={`enh-${enhancement.id}`}
-          checked={enhancement.selected}
-          onCheckedChange={() => toggleEnhancement(enhancement.id)}
-          className="mt-1"
-        />
+        <Checkbox id={`enh-${enhancement.id}`} checked={enhancement.selected} onCheckedChange={() => toggleEnhancement(enhancement.id)} className="mt-1" />
       </div>
 
       {previewContent[enhancement.id] && (
-        <div className="mt-3 rounded-xl border border-border bg-muted/30 p-4 text-sm font-body">
+        <div className="mt-3 rounded-xl border border-border bg-muted/20 p-4 text-sm font-body">
           {enhancement.id === "featuredImage" ? (
             <div className="flex flex-col items-center">
               <img src={previewContent[enhancement.id]} alt="Featured" className="max-h-64 object-contain rounded-xl" />
               <p className="text-xs text-muted-foreground mt-2">AI-generated image</p>
             </div>
           ) : (
-            <div className="prose prose-sm max-w-none text-foreground/80" dangerouslySetInnerHTML={{ __html: previewContent[enhancement.id].replace(/\n/g, "<br />") }} />
+            <div className="prose prose-sm max-w-none text-foreground/75" dangerouslySetInnerHTML={{ __html: previewContent[enhancement.id].replace(/\n/g, "<br />") }} />
           )}
         </div>
       )}
@@ -184,16 +170,12 @@ export function Step9ArticleEnhancements() {
 
   return (
     <div className="space-y-8">
-      <p className="text-base font-body text-muted-foreground leading-relaxed max-w-2xl">
-        Elevate your article with AI-powered enhancements for maximum engagement and SEO impact.
-      </p>
-
       <button className="artisan-btn-primary" onClick={saveEnhancements}>
         <Check className="h-4 w-4" /> Save Enhancements
       </button>
 
       <Tabs defaultValue="content">
-        <TabsList className="bg-muted/50 rounded-xl p-1">
+        <TabsList className="bg-muted/40 rounded-xl p-1">
           <TabsTrigger value="content" className="rounded-lg text-xs font-body data-[state=active]:bg-card data-[state=active]:shadow-sm">Content</TabsTrigger>
           <TabsTrigger value="visual" className="rounded-lg text-xs font-body data-[state=active]:bg-card data-[state=active]:shadow-sm">Visual</TabsTrigger>
           <TabsTrigger value="promotion" className="rounded-lg text-xs font-body data-[state=active]:bg-card data-[state=active]:shadow-sm">Promotion</TabsTrigger>
@@ -205,15 +187,13 @@ export function Step9ArticleEnhancements() {
         <TabsContent value="navigation" className="space-y-3 mt-4">{navigationEnhancements.map(renderEnhancement)}</TabsContent>
       </Tabs>
 
-      <Separator />
-
-      <div className="artisan-card p-5 border-primary/15 bg-primary/5">
+      <div className="artisan-card p-5 border-primary/10 bg-accent/30">
         <div className="flex items-start gap-3">
           <BookOpen className="h-5 w-5 text-primary shrink-0 mt-0.5" />
           <div>
             <h4 className="text-sm font-body font-semibold text-foreground mb-1">Enhancement Tip</h4>
             <p className="text-sm font-body text-muted-foreground leading-relaxed">
-              Articles with visual elements get 94% more views. FAQ sections boost SEO by enabling featured snippets in search results.
+              Articles with visual elements get 94% more views. FAQ sections boost SEO by enabling featured snippets.
             </p>
           </div>
         </div>

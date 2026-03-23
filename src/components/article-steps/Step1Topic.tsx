@@ -83,87 +83,65 @@ export function Step1Topic() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <p className="text-base font-body text-muted-foreground leading-relaxed max-w-2xl">
-          Define the foundation of your article. Choose a compelling topic and tailor it for your target audience.
-        </p>
+      {/* Topic Input */}
+      <div className="artisan-card p-7">
+        <label htmlFor="topic" className="block text-[11px] font-body font-semibold text-muted-foreground mb-3 tracking-[0.12em] uppercase">
+          What would you like to write about?
+        </label>
+        <div className="relative">
+          <input
+            id="topic"
+            type="text"
+            className="artisan-input text-base py-4"
+            placeholder="e.g., VCI packaging, sustainable materials, corrosion prevention..."
+            value={state.topic}
+            onChange={handleTopicChange}
+            onFocus={() => setShowSuggestions(true)}
+            onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+          />
+          {showSuggestions && (
+            <div className="absolute z-20 w-full mt-2 artisan-card p-2 max-h-60 overflow-auto animate-scale-in shadow-luxury">
+              <p className="text-[10px] font-body tracking-[0.12em] uppercase text-muted-foreground/60 px-3 py-2">
+                Quick Suggestions
+              </p>
+              {SAMPLE_PACKAGING_TOPICS.map((topic, index) => (
+                <button
+                  key={index}
+                  className="w-full text-left px-4 py-2.5 rounded-xl text-sm font-body text-foreground/80 hover:bg-accent hover:text-accent-foreground transition-all duration-200"
+                  onClick={() => handleSuggestionClick(topic)}
+                >
+                  {topic}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
-      <div className="space-y-6">
-        {/* Topic Input */}
+      {/* Country & Language */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <div className="artisan-card p-6">
-          <label htmlFor="topic" className="block text-sm font-body font-semibold text-foreground mb-3 tracking-wide uppercase">
-            Topic
+          <label htmlFor="targetCountry" className="flex items-center gap-2 text-[11px] font-body font-semibold text-muted-foreground mb-3 tracking-[0.12em] uppercase">
+            <MapPin className="h-3.5 w-3.5 text-primary" />
+            Target Location
           </label>
-          <div className="relative">
-            <input
-              id="topic"
-              type="text"
-              className="artisan-input text-base"
-              placeholder="Enter your topic (e.g., VCI bags, sustainable packaging)"
-              value={state.topic}
-              onChange={handleTopicChange}
-              onFocus={() => setShowSuggestions(true)}
-              onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-            />
-            {showSuggestions && (
-              <div className="absolute z-20 w-full mt-2 artisan-card p-2 max-h-60 overflow-auto animate-scale-in">
-                <p className="text-[10px] font-body tracking-[0.15em] uppercase text-muted-foreground px-3 py-2">
-                  Suggested Topics
-                </p>
-                {SAMPLE_PACKAGING_TOPICS.map((topic, index) => (
-                  <button
-                    key={index}
-                    className="w-full text-left px-3 py-2.5 rounded-lg text-sm font-body text-foreground hover:bg-primary/5 hover:text-primary transition-premium"
-                    onClick={() => handleSuggestionClick(topic)}
-                  >
-                    {topic}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
+          <select id="targetCountry" className="artisan-select" value={state.targetCountry} onChange={handleCountryChange}>
+            {COUNTRIES.map((country) => (
+              <option key={country.id} value={country.id}>{country.flag} {country.name}</option>
+            ))}
+          </select>
         </div>
 
-        {/* Country & Language */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <div className="artisan-card p-6">
-            <label htmlFor="targetCountry" className="flex items-center gap-2 text-sm font-body font-semibold text-foreground mb-3 tracking-wide uppercase">
-              <MapPin className="h-3.5 w-3.5 text-primary" />
-              Target Location
-            </label>
-            <select
-              id="targetCountry"
-              className="artisan-select"
-              value={state.targetCountry}
-              onChange={handleCountryChange}
-            >
-              {COUNTRIES.map((country) => (
-                <option key={country.id} value={country.id}>
-                  {country.flag} {country.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="artisan-card p-6">
-            <label htmlFor="language" className="flex items-center gap-2 text-sm font-body font-semibold text-foreground mb-3 tracking-wide uppercase">
-              <Globe className="h-3.5 w-3.5 text-primary" />
-              Article Language
-            </label>
-            <select
-              id="language"
-              className="artisan-select"
-              value={state.language}
-              onChange={handleLanguageChange}
-            >
-              {LANGUAGES.map((language) => (
-                <option key={language.id} value={language.id}>
-                  {language.flag} {language.name}
-                </option>
-              ))}
-            </select>
-          </div>
+        <div className="artisan-card p-6">
+          <label htmlFor="language" className="flex items-center gap-2 text-[11px] font-body font-semibold text-muted-foreground mb-3 tracking-[0.12em] uppercase">
+            <Globe className="h-3.5 w-3.5 text-primary" />
+            Article Language
+          </label>
+          <select id="language" className="artisan-select" value={state.language} onChange={handleLanguageChange}>
+            {LANGUAGES.map((language) => (
+              <option key={language.id} value={language.id}>{language.flag} {language.name}</option>
+            ))}
+          </select>
         </div>
       </div>
 
@@ -171,33 +149,29 @@ export function Step1Topic() {
       {state.topic && (
         <div className="artisan-card overflow-hidden animate-fade-up">
           <div className="px-6 py-4 border-b border-border flex items-center justify-between">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2.5">
               <Sparkles className="h-4 w-4 text-primary" />
-              <h3 className="font-display text-lg font-semibold text-foreground">AI Suggestions</h3>
+              <h3 className="font-display text-lg text-foreground">AI-Powered Suggestions</h3>
             </div>
             <div className="flex items-center gap-2">
               {loadingSuggestions && <Loader2 className="h-4 w-4 text-primary animate-spin" />}
-              <button
-                onClick={handleRegenerateSuggestions}
-                disabled={loadingSuggestions}
-                className="artisan-btn-ghost text-xs"
-              >
+              <button onClick={handleRegenerateSuggestions} disabled={loadingSuggestions} className="artisan-btn-ghost text-xs">
                 <RefreshCw className="h-3.5 w-3.5" />
-                Regenerate
+                Refresh
               </button>
             </div>
           </div>
 
           {error && (
-            <div className="mx-6 mt-4 p-3 rounded-lg bg-destructive/5 border border-destructive/20 text-destructive text-sm font-body">
+            <div className="mx-6 mt-4 p-3.5 rounded-xl bg-destructive/5 border border-destructive/15 text-destructive text-sm font-body">
               {error}
             </div>
           )}
 
-          <div className="p-4">
+          <div className="p-5">
             {loadingSuggestions ? (
-              <div className="text-center py-8 text-muted-foreground text-sm font-body">
-                <Loader2 className="h-5 w-5 animate-spin mx-auto mb-2 text-primary" />
+              <div className="text-center py-10 text-muted-foreground text-sm font-body">
+                <Loader2 className="h-5 w-5 animate-spin mx-auto mb-3 text-primary" />
                 Generating smart suggestions...
               </div>
             ) : aiTitleSuggestions.length > 0 ? (
@@ -205,7 +179,7 @@ export function Step1Topic() {
                 {aiTitleSuggestions.map((suggestion, index) => (
                   <button
                     key={index}
-                    className="text-left p-3.5 rounded-xl text-sm font-body text-foreground/80 hover:bg-primary/5 hover:text-primary transition-premium border border-transparent hover:border-primary/10"
+                    className="text-left p-4 rounded-xl text-sm font-body text-foreground/75 hover:bg-accent hover:text-accent-foreground transition-all duration-200 border border-transparent hover:border-primary/10"
                     onClick={() => handleSuggestionClick(suggestion)}
                   >
                     {suggestion}
@@ -213,8 +187,8 @@ export function Step1Topic() {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-8 text-muted-foreground text-sm font-body">
-                Enter a specific topic to see AI-generated suggestions
+              <div className="text-center py-10 text-muted-foreground text-sm font-body">
+                Type at least 3 characters to see AI suggestions
               </div>
             )}
           </div>
